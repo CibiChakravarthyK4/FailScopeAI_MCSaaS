@@ -15,7 +15,7 @@ export const Input = forwardRef<HTMLInputElement, Props>(({ label, error, id, cl
       <input
         ref={ref}
         id={inputId}
-        className={`w-full rounded-md border px-3 py-2.5 text-ink outline-none transition-colors focus:border-brand-blue ${
+        className={`w-full rounded-md border px-3 py-2.5 text-ink outline-none transition-colors focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 ${
           error ? 'border-red-500' : 'border-line'
         } ${className}`}
         {...props}

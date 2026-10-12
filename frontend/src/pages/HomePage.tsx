@@ -3,26 +3,77 @@ import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 
+function EvidenceIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="h-5 w-5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M20.5 20.5 16 16" />
+    </svg>
+  );
+}
+
+function ShieldIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="h-5 w-5">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 3 4 6v6c0 5 3.5 7.5 8 9 4.5-1.5 8-4 8-9V6l-8-3Z"
+      />
+      <path strokeLinecap="round" strokeLinejoin="round" d="m9 12 2 2 4-4" />
+    </svg>
+  );
+}
+
+function ReviewerIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="h-5 w-5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16 21v-1a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v1" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="m16 11 2 2 4-4" />
+    </svg>
+  );
+}
+
+function ExportIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="h-5 w-5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 15V3m0 0 4 4m-4-4-4 4" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4" />
+    </svg>
+  );
+}
+
 const FEATURES = [
   {
+    icon: EvidenceIcon,
     title: 'Evidence-backed diagnosis',
     description:
       'Every AI hypothesis cites the exact stack trace or log line behind it — no black-box guesses, and it abstains when the evidence is too thin.',
   },
   {
+    icon: ShieldIcon,
     title: 'Secrets redacted automatically',
     description:
       'Credentials, tokens, and connection strings are scrubbed from logs before anything is sent to the model.',
   },
   {
+    icon: ReviewerIcon,
     title: 'Reviewer stays in control',
     description:
       'Accept, reject, or correct every AI call. Nothing gets filed as a defect without a human saying so.',
   },
   {
+    icon: ExportIcon,
     title: 'One-click defect export',
     description: 'Turn a confirmed failure into a clean, evidence-linked defect draft, ready to publish.',
   },
+];
+
+const STATS = [
+  { value: '6', label: 'Failure categories classified' },
+  { value: '100%', label: 'Diagnoses cite real evidence' },
+  { value: '0', label: 'Defects filed without human review' },
 ];
 
 const STEPS = [
@@ -60,6 +111,9 @@ export function HomePage() {
 
       <main>
         <section className="mx-auto max-w-4xl px-6 py-24 text-center">
+          <span className="mb-5 inline-block rounded-full border border-line bg-brand-blue-light px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-blue">
+            AI Test Failure Investigator
+          </span>
           <h1 className="text-4xl font-semibold leading-tight text-ink sm:text-5xl">
             Investigate failed tests with AI —<br className="hidden sm:block" /> not guesswork.
           </h1>
@@ -78,6 +132,15 @@ export function HomePage() {
               </Button>
             </Link>
           </div>
+
+          <div className="mx-auto mt-16 grid max-w-3xl grid-cols-1 gap-8 border-t border-line pt-10 sm:grid-cols-3">
+            {STATS.map((stat) => (
+              <div key={stat.label}>
+                <p className="text-3xl font-semibold text-brand-blue">{stat.value}</p>
+                <p className="mt-1 text-sm text-muted">{stat.label}</p>
+              </div>
+            ))}
+          </div>
         </section>
 
         <section className="border-t border-line bg-brand-blue-light/40">
@@ -86,12 +149,18 @@ export function HomePage() {
               Why teams switch
             </h2>
             <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2">
-              {FEATURES.map((feature) => (
-                <Card key={feature.title}>
-                  <h3 className="mb-2 font-semibold text-ink">{feature.title}</h3>
-                  <p className="text-sm text-muted">{feature.description}</p>
-                </Card>
-              ))}
+              {FEATURES.map((feature) => {
+                const Icon = feature.icon;
+                return (
+                  <Card key={feature.title} className="transition-shadow hover:shadow-md">
+                    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-brand-blue-light text-brand-blue">
+                      <Icon />
+                    </div>
+                    <h3 className="mb-2 font-semibold text-ink">{feature.title}</h3>
+                    <p className="text-sm text-muted">{feature.description}</p>
+                  </Card>
+                );
+              })}
             </div>
           </div>
         </section>
