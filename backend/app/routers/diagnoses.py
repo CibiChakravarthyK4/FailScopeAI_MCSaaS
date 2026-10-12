@@ -7,6 +7,7 @@ from app.exceptions import AppException
 from app.models.diagnosis import Diagnosis
 from app.models.test_case import TestCase
 from app.models.user import User, UserRole
+from app.rate_limit import check_rate_limit
 from app.schemas.diagnosis import DiagnosisListItem, DiagnosisResponse
 from app.schemas.review import ReviewRequest, ReviewResponse
 from app.services import diagnosis_service, review_service
@@ -42,6 +43,9 @@ def run_diagnosis(
     db: Session = Depends(get_db),
     user: User = Depends(require_role(UserRole.admin, UserRole.analyst)),
 ):
+    # Defense in depth alongside the monthly cost ceiling: caps how fast a tenant
+    # can trigger model calls, independent of total monthly spend.
+    check_rate_limit(f"ratelimit:diagnosis_run:{user.tenant_id}", limit=30, window_seconds=3600)
     try:
         diagnosis = diagnosis_service.run_investigation(db, user.tenant_id, user.id, test_case_id)
     except AppException as exc:

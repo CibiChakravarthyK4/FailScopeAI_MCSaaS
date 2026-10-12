@@ -1,4 +1,5 @@
 import pytest
+
 from app.exceptions import ValidationFailedError
 from app.services.junit_parser import parse_junit_xml
 

@@ -10,7 +10,11 @@ COPY ./app ./app
 COPY alembic.ini .
 COPY ./alembic ./alembic
 
-RUN useradd -m appuser && chown -R appuser:appuser /app
+RUN mkdir -p /app/storage && useradd -m appuser && chown -R appuser:appuser /app
+# /app/storage is a volume mount point; creating it with appuser ownership
+# before the volume is first attached ensures Docker copies that ownership
+# into the new volume (it only inherits the image's permissions on first
+# creation) - otherwise the volume defaults to root and appuser can't write to it.
 USER appuser
 
 EXPOSE 8000

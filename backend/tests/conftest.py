@@ -31,10 +31,9 @@ def _ensure_test_database() -> None:
 
 _ensure_test_database()
 
-from app.database import Base  # noqa: E402
-from app.database import get_db  # noqa: E402
-from app.main import app  # noqa: E402
 from app import models  # noqa: E402,F401
+from app.database import Base, get_db  # noqa: E402
+from app.main import app  # noqa: E402
 
 TEST_DATABASE_URL = os.environ["DATABASE_URL"]
 engine = create_engine(TEST_DATABASE_URL)
@@ -84,6 +83,20 @@ def client(db):
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
+
+
+@pytest.fixture(autouse=True)
+def _reset_rate_limits():
+    """Rate-limit counters live in real Redis, not the per-test DB transaction, so
+    they'd otherwise leak across tests (TestClient requests all share the same
+    'testclient' identifier) and cause order-dependent 429s unrelated to what a
+    test is actually checking."""
+    from app.rate_limit import _redis as rl_redis
+
+    keys = rl_redis.keys("ratelimit:*")
+    if keys:
+        rl_redis.delete(*keys)
+    yield
 
 
 @pytest.fixture(autouse=True)

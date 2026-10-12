@@ -1,4 +1,5 @@
 import pytest
+
 from app.models.job import Job, JobStatus, JobType
 from app.models.run import Run, RunStatus
 from app.models.tenant import Tenant
@@ -72,7 +73,14 @@ def test_process_import_job_marks_failed_after_max_attempts(db, monkeypatch):
             # "bogus" is not a valid TestCaseStatus - this forces process_import_job
             # into its exception branch so we can verify the give-up-after-N behavior.
             "parsed_cases": [
-                {"name": "t", "classname": "C", "status": "bogus", "duration_ms": 1, "stack_trace": None, "started_at": None}
+                {
+                    "name": "t",
+                    "classname": "C",
+                    "status": "bogus",
+                    "duration_ms": 1,
+                    "stack_trace": None,
+                    "started_at": None,
+                }
             ],
         },
     )
@@ -116,7 +124,14 @@ def test_process_import_job_leaves_room_for_retry_below_max_attempts(db, monkeyp
             "junit_checksum": "x",
             "attachments": [],
             "parsed_cases": [
-                {"name": "t", "classname": "C", "status": "bogus", "duration_ms": 1, "stack_trace": None, "started_at": None}
+                {
+                    "name": "t",
+                    "classname": "C",
+                    "status": "bogus",
+                    "duration_ms": 1,
+                    "stack_trace": None,
+                    "started_at": None,
+                }
             ],
         },
     )

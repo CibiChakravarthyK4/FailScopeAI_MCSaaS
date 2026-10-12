@@ -23,6 +23,8 @@ coverage/
 
 # Storage
 backend/storage/
+backups/*.dump
+backups/*.tar.gz
 
 # IDE/OS
 .vscode/

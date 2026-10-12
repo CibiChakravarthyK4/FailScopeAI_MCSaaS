@@ -115,3 +115,32 @@ python -m app.workers.run_worker
 npm run dev
 ```
 Or via Docker: `docker compose up` from the repo root (builds db, redis, backend, worker, frontend).
+The backend container runs `alembic upgrade head` automatically on start - fresh
+deploys self-migrate with zero manual steps. The `/app/storage` volume mount
+point is created with `appuser` ownership in the image *before* `useradd`'s
+chown, so a fresh volume inherits the right permissions on first attach
+(Docker only copies the image's ownership into a brand-new volume once, at
+creation) - otherwise every upload fails with a `PermissionError`.
+
+---
+
+## 8. Backup & Restore (C07)
+
+`scripts/backup.sh` dumps the Postgres database (`pg_dump -Fc`) and the artifact
+storage volume (tarball) to `backups/<name>_<timestamp>.{dump,tar.gz}`.
+`scripts/restore.sh <timestamp>` reverses it - `pg_restore --clean` against the
+db container plus extracting the tarball back into the storage volume.
+
+Both scripts set `MSYS_NO_PATHCONV=1` and stream through stdin/stdout rather than
+a second bind mount, to avoid a Git-Bash-on-Windows path-mangling gotcha where a
+POSIX-looking argument meant for *inside* the container gets rewritten as a
+Windows host path.
+
+Verified end-to-end (2026-10-12): imported a run, backed up, wiped both volumes
+with `docker compose down -v`, restored, and confirmed both the database row and
+the actual artifact file on disk survived intact.
+
+```bash
+bash scripts/backup.sh                  # writes backups/db_<ts>.dump + artifacts_<ts>.tar.gz
+bash scripts/restore.sh <ts>             # restores that pair, replacing current data
+```

@@ -11,6 +11,7 @@ from app.config import settings
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.exceptions import AppException
+from app.rate_limit import rate_limit_by_ip
 from app.schemas.auth import (
     LoginRequest,
     LogoutRequest,
@@ -24,7 +25,12 @@ from app.services import auth_service
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/register", response_model=TokenResponse, status_code=201)
+@router.post(
+    "/register",
+    response_model=TokenResponse,
+    status_code=201,
+    dependencies=[Depends(rate_limit_by_ip("register", limit=5, window_seconds=3600))],
+)
 def register(req: RegisterRequest, db: Session = Depends(get_db)):
     try:
         user = auth_service.register(db, req.email, req.password, req.full_name, req.tenant_name)
@@ -34,7 +40,11 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
     return TokenResponse(access_token=access, refresh_token=refresh)
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post(
+    "/login",
+    response_model=TokenResponse,
+    dependencies=[Depends(rate_limit_by_ip("login", limit=10, window_seconds=300))],
+)
 def login(req: LoginRequest, db: Session = Depends(get_db)):
     user = auth_service.authenticate(db, req.email, req.password)
     if not user:
@@ -43,7 +53,10 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
     return TokenResponse(access_token=access, refresh_token=refresh)
 
 
-@router.post("/refresh")
+@router.post(
+    "/refresh",
+    dependencies=[Depends(rate_limit_by_ip("refresh", limit=20, window_seconds=300))],
+)
 def refresh(req: RefreshRequest, db: Session = Depends(get_db)):
     try:
         access = auth_service.refresh_access_token(db, req.refresh_token)
