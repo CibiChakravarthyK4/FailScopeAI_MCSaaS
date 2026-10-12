@@ -1,0 +1,26 @@
+name: failscope-ai
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: failscope
+      POSTGRES_PASSWORD: failscope
+      POSTGRES_DB: failscope
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U failscope"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+
+volumes:
+  postgres_data:

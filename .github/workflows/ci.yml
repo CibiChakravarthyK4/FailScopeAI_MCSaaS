@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: failscope
+          POSTGRES_PASSWORD: failscope
+          POSTGRES_DB: failscope_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U failscope"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -r requirements-dev.txt
+      - name: Lint
+        run: |
+          cd backend
+          ruff check app
+      - name: Test
+        env:
+          DATABASE_URL: postgresql://failscope:failscope@localhost:5432/failscope_test
+          SECRET_KEY: ci-test-secret
+        run: |
+          cd backend
+          pytest --cov=app --cov-fail-under=80
+
+  frontend-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+      - name: Lint and type-check
+        run: |
+          cd frontend
+          npm run lint
+          npm run type-check
+      - name: Test
+        run: |
+          cd frontend
+          npm test -- --run
+
+  build:
+    needs: [backend-test, frontend-test]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose build
