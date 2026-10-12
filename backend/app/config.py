@@ -26,6 +26,12 @@ class Settings(BaseSettings):
     MAX_UPLOAD_SIZE_MB: int = 25
     MAX_STORAGE_MB_PER_TENANT: int = 500
 
+    STRIPE_SECRET_KEY: str = ""
+    STRIPE_PRICE_ID_PRO: str = ""
+    STRIPE_WEBHOOK_SECRET: str = ""
+
+    PLATFORM_OWNER_EMAILS: str = ""
+
     class Config:
         env_file = ".env"
 

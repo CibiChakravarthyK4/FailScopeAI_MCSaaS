@@ -2,11 +2,13 @@ from datetime import UTC, datetime
 
 from sqlalchemy.orm import Session
 
-from app.config import settings
+from app.exceptions import NotFoundError
 from app.models.diagnosis import Diagnosis, DiagnosisStatus
 from app.models.failure_group import FailureGroup, FailureGroupMember
 from app.models.review import Review, ReviewAction
+from app.models.tenant import Tenant
 from app.models.usage_record import UsageRecord
+from app.services.billing_service import get_plan_limits
 from app.services.usage_service import current_period, get_total_storage_bytes
 
 
@@ -87,15 +89,21 @@ def compute_metrics(db: Session, tenant_id: int) -> dict:
 
 
 def get_usage(db: Session, tenant_id: int) -> dict:
+    tenant = db.query(Tenant).filter(Tenant.id == tenant_id).first()
+    if not tenant:
+        raise NotFoundError("Tenant")
+    limits = get_plan_limits(tenant.plan)
+
     period = current_period()
     record = db.query(UsageRecord).filter(UsageRecord.tenant_id == tenant_id, UsageRecord.period == period).first()
     return {
         "period": period,
+        "plan": tenant.plan,
         "jobs_count": record.jobs_count if record else 0,
         "model_tokens_in": record.model_tokens_in if record else 0,
         "model_tokens_out": record.model_tokens_out if record else 0,
         "cost_estimate_usd": record.cost_estimate_usd if record else 0.0,
-        "cost_ceiling_usd": settings.MODEL_COST_CEILING_USD,
+        "cost_ceiling_usd": limits["cost_ceiling_usd"],
         "total_storage_bytes": get_total_storage_bytes(db, tenant_id),
-        "storage_quota_bytes": settings.MAX_STORAGE_MB_PER_TENANT * 1024 * 1024,
+        "storage_quota_bytes": limits["storage_mb"] * 1024 * 1024,
     }

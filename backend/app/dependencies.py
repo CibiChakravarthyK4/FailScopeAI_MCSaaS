@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from app.auth.jwt import decode_token
+from app.config import settings
 from app.database import get_db
 from app.models.user import User, UserRole
 
@@ -31,3 +32,14 @@ def require_role(*roles: UserRole):
         return user
 
     return dependency
+
+
+def require_platform_owner(user: User = Depends(get_current_user)) -> User:
+    """Platform-owner access (the SaaS operator, across all tenants) is driven by
+    a config allowlist rather than a DB flag - there's no bootstrapping chicken-
+    and-egg problem (no existing superuser needed to grant the first one), and it
+    can't be escalated to by mutating application data."""
+    owner_emails = {e.strip().lower() for e in settings.PLATFORM_OWNER_EMAILS.split(",") if e.strip()}
+    if user.email.lower() not in owner_emails:
+        raise HTTPException(status_code=403, detail="Platform owner access required")
+    return user

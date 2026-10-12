@@ -25,6 +25,7 @@ class MetricsResponse(BaseModel):
 
 class UsageResponse(BaseModel):
     period: str
+    plan: str
     jobs_count: int
     model_tokens_in: int
     model_tokens_out: int

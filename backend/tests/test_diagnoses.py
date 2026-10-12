@@ -79,8 +79,10 @@ def test_run_diagnosis_is_idempotent_while_pending(client, monkeypatch):
 
 
 def test_diagnosis_respects_cost_ceiling(client, monkeypatch):
+    # usage_service now resolves the ceiling live via billing_service's plan
+    # lookup rather than reading settings directly, so patching settings here is
+    # enough - no second patch on a `usage_service.settings` that no longer exists.
     monkeypatch.setattr("app.config.settings.MODEL_COST_CEILING_USD", 0.0)
-    monkeypatch.setattr("app.services.usage_service.settings.MODEL_COST_CEILING_USD", 0.0)
     monkeypatch.setattr("app.services.diagnosis_service.ai_adapter.investigate", lambda *a, **kw: _fake_result())
     tokens = register_tenant(client)
     headers = auth_header(tokens)

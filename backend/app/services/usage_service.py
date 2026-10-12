@@ -3,10 +3,11 @@ from datetime import UTC, datetime
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.config import settings
-from app.exceptions import ForbiddenError
+from app.exceptions import ForbiddenError, NotFoundError
 from app.models.artifact import Artifact
+from app.models.tenant import Tenant
 from app.models.usage_record import UsageRecord
+from app.services.billing_service import get_plan_limits
 
 
 def current_period() -> str:
@@ -28,11 +29,20 @@ def _get_or_create(db: Session, tenant_id: int) -> UsageRecord:
     return record
 
 
+def _get_plan_limits_for_tenant(db: Session, tenant_id: int) -> dict:
+    tenant = db.query(Tenant).filter(Tenant.id == tenant_id).first()
+    if not tenant:
+        raise NotFoundError("Tenant")
+    return get_plan_limits(tenant.plan)
+
+
 def check_cost_ceiling(db: Session, tenant_id: int) -> None:
+    limits = _get_plan_limits_for_tenant(db, tenant_id)
     record = _get_or_create(db, tenant_id)
-    if record.cost_estimate_usd >= settings.MODEL_COST_CEILING_USD:
+    if record.cost_estimate_usd >= limits["cost_ceiling_usd"]:
         raise ForbiddenError(
-            f"Monthly model cost ceiling (${settings.MODEL_COST_CEILING_USD:.2f}) reached for this workspace"
+            f"Monthly model cost ceiling (${limits['cost_ceiling_usd']:.2f}) reached for this workspace. "
+            "Upgrade your plan to raise it."
         )
 
 
@@ -53,10 +63,11 @@ def get_total_storage_bytes(db: Session, tenant_id: int) -> int:
 
 
 def check_storage_quota(db: Session, tenant_id: int, incoming_bytes: int) -> None:
-    quota_bytes = settings.MAX_STORAGE_MB_PER_TENANT * 1024 * 1024
+    limits = _get_plan_limits_for_tenant(db, tenant_id)
+    quota_bytes = limits["storage_mb"] * 1024 * 1024
     current_total = get_total_storage_bytes(db, tenant_id)
     if current_total + incoming_bytes > quota_bytes:
         raise ForbiddenError(
-            f"This import would exceed the workspace storage quota "
-            f"({settings.MAX_STORAGE_MB_PER_TENANT} MB). Delete old runs or contact support to raise it."
+            f"This import would exceed the workspace storage quota ({limits['storage_mb']} MB). "
+            "Delete old runs or upgrade your plan."
         )

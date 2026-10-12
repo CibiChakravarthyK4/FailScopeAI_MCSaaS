@@ -17,6 +17,7 @@ import { ReviewQueuePage } from './pages/ReviewQueuePage';
 import { ExportDraftPage } from './pages/ExportDraftPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { HomePage } from './pages/HomePage';
+import { PlatformDashboardPage } from './pages/PlatformDashboardPage';
 
 const queryClient = new QueryClient();
 
@@ -114,6 +115,14 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <SettingsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/platform"
+              element={
+                <ProtectedRoute>
+                  <PlatformDashboardPage />
                 </ProtectedRoute>
               }
             />

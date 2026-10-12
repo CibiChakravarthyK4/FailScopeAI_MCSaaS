@@ -22,6 +22,7 @@ export interface Metrics {
 
 export interface Usage {
   period: string;
+  plan: string;
   jobs_count: number;
   model_tokens_in: number;
   model_tokens_out: number;

@@ -8,11 +8,13 @@ from app.middleware import MaxBodySizeMiddleware
 from app.routers import (
     audit_logs,
     auth,
+    billing,
     dashboard,
     diagnoses,
     exports,
     failure_groups,
     jobs,
+    platform,
     runs,
 )
 
@@ -43,6 +45,8 @@ app.include_router(exports.router)
 app.include_router(audit_logs.router)
 app.include_router(dashboard.router)
 app.include_router(dashboard.usage_router)
+app.include_router(billing.router)
+app.include_router(platform.router)
 
 
 @app.get("/health")
