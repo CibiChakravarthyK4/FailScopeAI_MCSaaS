@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.models.job import Job, JobStatus, JobType
 from app.models.run import Run, RunStatus
-from app.services import audit_service
+from app.services import audit_service, usage_service
 from app.services.junit_parser import parse_junit_xml
 from app.storage.local_storage import save_artifact
 from app.workers.queue import import_queue
@@ -27,6 +27,9 @@ def import_run(
 
     parsed_cases = parse_junit_xml(junit_content)  # raises ValidationFailedError on malformed input
 
+    incoming_bytes = len(junit_content) + sum(len(content) for _, content in attachments)
+    usage_service.check_storage_quota(db, tenant_id, incoming_bytes)
+
     run = Run(
         tenant_id=tenant_id,
         external_run_id=external_run_id,
@@ -43,12 +46,13 @@ def import_run(
     saved_attachments = []
     for filename, content in attachments:
         path, digest = save_artifact(tenant_id, run.id, filename, content)
-        saved_attachments.append({"filename": filename, "path": path, "checksum": digest})
+        saved_attachments.append({"filename": filename, "path": path, "checksum": digest, "size": len(content)})
 
     payload = {
         "run_id": run.id,
         "junit_path": junit_path,
         "junit_checksum": junit_checksum,
+        "junit_size": len(junit_content),
         "attachments": saved_attachments,
         "parsed_cases": [
             {

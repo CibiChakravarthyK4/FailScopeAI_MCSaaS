@@ -1,6 +1,7 @@
 import enum
 
 from sqlalchemy import (
+    BigInteger,
     Boolean,
     Column,
     Enum,
@@ -32,6 +33,7 @@ class Artifact(Base, TimestampMixin):
     type = Column(Enum(ArtifactType), nullable=False)
     storage_path = Column(String(1000), nullable=False)
     checksum_sha256 = Column(String(64), nullable=False)
+    size_bytes = Column(BigInteger, nullable=False, default=0)
     redacted = Column(Boolean, default=False)
 
     run = relationship("Run", back_populates="artifacts")

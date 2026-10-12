@@ -82,6 +82,7 @@ def process_import_job(job_id: int) -> None:
                             type=_artifact_type(att["filename"]),
                             storage_path=att["path"],
                             checksum_sha256=att["checksum"],
+                            size_bytes=att.get("size", 0),
                             redacted=False,
                         )
                     )
@@ -97,6 +98,7 @@ def process_import_job(job_id: int) -> None:
                 type=ArtifactType.trace,
                 storage_path=payload["junit_path"],
                 checksum_sha256=payload["junit_checksum"],
+                size_bytes=payload.get("junit_size", 0),
                 redacted=False,
             )
         )

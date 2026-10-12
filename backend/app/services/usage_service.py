@@ -1,9 +1,11 @@
 from datetime import UTC, datetime
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.exceptions import ForbiddenError
+from app.models.artifact import Artifact
 from app.models.usage_record import UsageRecord
 
 
@@ -41,3 +43,20 @@ def record_model_call(db: Session, tenant_id: int, tokens_in: int, tokens_out: i
     record.model_tokens_out += tokens_out
     record.cost_estimate_usd += cost_usd
     db.commit()
+
+
+def get_total_storage_bytes(db: Session, tenant_id: int) -> int:
+    """Storage is a running total, not a monthly flow, so it's computed live from
+    the artifacts table rather than an incrementable counter that could drift."""
+    total = db.query(func.sum(Artifact.size_bytes)).filter(Artifact.tenant_id == tenant_id).scalar()
+    return int(total or 0)
+
+
+def check_storage_quota(db: Session, tenant_id: int, incoming_bytes: int) -> None:
+    quota_bytes = settings.MAX_STORAGE_MB_PER_TENANT * 1024 * 1024
+    current_total = get_total_storage_bytes(db, tenant_id)
+    if current_total + incoming_bytes > quota_bytes:
+        raise ForbiddenError(
+            f"This import would exceed the workspace storage quota "
+            f"({settings.MAX_STORAGE_MB_PER_TENANT} MB). Delete old runs or contact support to raise it."
+        )

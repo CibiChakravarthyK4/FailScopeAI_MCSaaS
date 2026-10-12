@@ -24,6 +24,7 @@ class Settings(BaseSettings):
 
     STORAGE_ROOT: str = "./storage"
     MAX_UPLOAD_SIZE_MB: int = 25
+    MAX_STORAGE_MB_PER_TENANT: int = 500
 
     class Config:
         env_file = ".env"

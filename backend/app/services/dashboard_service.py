@@ -7,7 +7,7 @@ from app.models.diagnosis import Diagnosis, DiagnosisStatus
 from app.models.failure_group import FailureGroup, FailureGroupMember
 from app.models.review import Review, ReviewAction
 from app.models.usage_record import UsageRecord
-from app.services.usage_service import current_period
+from app.services.usage_service import current_period, get_total_storage_bytes
 
 
 def list_group_summaries(db: Session, tenant_id: int, unresolved_only: bool, max_age_days: int | None) -> list[dict]:
@@ -92,9 +92,10 @@ def get_usage(db: Session, tenant_id: int) -> dict:
     return {
         "period": period,
         "jobs_count": record.jobs_count if record else 0,
-        "storage_bytes": record.storage_bytes if record else 0,
         "model_tokens_in": record.model_tokens_in if record else 0,
         "model_tokens_out": record.model_tokens_out if record else 0,
         "cost_estimate_usd": record.cost_estimate_usd if record else 0.0,
         "cost_ceiling_usd": settings.MODEL_COST_CEILING_USD,
+        "total_storage_bytes": get_total_storage_bytes(db, tenant_id),
+        "storage_quota_bytes": settings.MAX_STORAGE_MB_PER_TENANT * 1024 * 1024,
     }

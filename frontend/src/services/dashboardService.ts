@@ -23,11 +23,12 @@ export interface Metrics {
 export interface Usage {
   period: string;
   jobs_count: number;
-  storage_bytes: number;
   model_tokens_in: number;
   model_tokens_out: number;
   cost_estimate_usd: number;
   cost_ceiling_usd: number;
+  total_storage_bytes: number;
+  storage_quota_bytes: number;
 }
 
 export async function getUnresolvedGroups(): Promise<GroupSummary[]> {

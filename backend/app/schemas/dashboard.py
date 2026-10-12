@@ -26,8 +26,9 @@ class MetricsResponse(BaseModel):
 class UsageResponse(BaseModel):
     period: str
     jobs_count: int
-    storage_bytes: int
     model_tokens_in: int
     model_tokens_out: int
     cost_estimate_usd: float
     cost_ceiling_usd: float
+    total_storage_bytes: int
+    storage_quota_bytes: int

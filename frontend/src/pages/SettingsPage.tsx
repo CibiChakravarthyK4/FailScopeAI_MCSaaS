@@ -4,6 +4,13 @@ import { PageWrapper } from '../components/layout/PageWrapper';
 import { Card } from '../components/ui/Card';
 import { getUsage, type Usage } from '../services/dashboardService';
 
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  const mb = bytes / (1024 * 1024);
+  if (mb < 1024) return `${mb.toFixed(1)} MB`;
+  return `${(mb / 1024).toFixed(2)} GB`;
+}
+
 export function SettingsPage() {
   const [usage, setUsage] = useState<Usage | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,6 +53,21 @@ export function SettingsPage() {
               <span className="text-sm font-medium text-ink">
                 {usage.model_tokens_in} / {usage.model_tokens_out}
               </span>
+            </div>
+
+            <div className="flex justify-between pt-2">
+              <span className="text-sm text-ink">Storage used</span>
+              <span className="text-sm font-medium text-ink">
+                {formatBytes(usage.total_storage_bytes)} / {formatBytes(usage.storage_quota_bytes)}
+              </span>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-line">
+              <div
+                className="h-full bg-brand-blue"
+                style={{
+                  width: `${Math.min(100, (usage.total_storage_bytes / usage.storage_quota_bytes) * 100)}%`,
+                }}
+              />
             </div>
           </Card>
         ) : (
