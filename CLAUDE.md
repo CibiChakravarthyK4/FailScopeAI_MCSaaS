@@ -1,7 +1,9 @@
-# FailScope AI — Project Context & Engineering Rules
+# RootTrace Ivory — Project Context & Engineering Rules
 
-## 1. Project Overview & Objective
-FailScope AI (AI Test Failure Investigator) is a multi-tenant SaaS application designed to ingest test failure reports (JUnit XML, error logs, and screenshots), normalize evidence, analyze root causes using AI, enable human-in-the-loop triage, and export clean, idempotent defect reports to Jira.
+## 1. Project Overview & Objective  *(changed: new product name)*
+RootTrace Ivory (Test Failure Investigator) is a multi-tenant SaaS application designed to ingest test failure reports (JUnit XML, error logs, and screenshots), normalize evidence, analyze root causes using AI, enable human-in-the-loop triage, and export clean, idempotent defect reports to Jira.
+
+**Product name:** RootTrace Ivory (formerly FailScope AI; the old name must not be used anywhere in the UI, docs or marketing). **Brand:** Ivory (see Section 14).
 
 ### Pilot Gate Targets
 - **Precision**: $\ge$ 80% precision on high-confidence categories evaluated on an independent labeled holdout set.
@@ -24,22 +26,66 @@ The LLM adapter and reviewer interface must strictly classify failures into one 
 ## 3. Core SaaS & Compliance Controls (C01 – C08)
 Every feature implementation must independently enforce these controls:
 
-- **C01 — Tenant Isolation**: Database access and object storage must be explicitly scoped by `tenant_id`. Server-side validation must reject cross-tenant access.
-- **C02 — Roles & RBAC**: Enforce 4 roles: `Admin`, `Analyst/Operator`, `Reviewer`, `Viewer`. Server-side authorization checks are mandatory on all API endpoints.
+- **C01 — Tenant Isolation**: Database access and object storage must be explicitly scoped by `tenant_id`. Server-side validation must reject cross-tenant access. **Single exception:** the `Platform Owner` role may read client account, plan, usage and billing data across tenants (Section 15). By default it must never read a tenant's artifacts, logs, screenshots, diagnoses or AI context (see client data protection in Section 15).
+- **C02 — Roles & RBAC**: Enforce **5 roles**: `Platform Owner`, `Admin`, `Analyst/Operator`, `Reviewer`, `Viewer`. `Platform Owner` sits above `Admin`, belongs to no tenant, and is limited to the product owner's account. Server-side authorization checks are mandatory on all API endpoints.
 - **C03 — Data Protection & Redaction**: Encrypt traffic and stored artifacts. Redact credentials/secrets (tokens, passwords, API keys) via regex before sending log data to LLM adapters.
 - **C04 — Reliable Background Jobs**: Run file parsing and AI analysis jobs asynchronously with explicit status tracking (`queued`, `processing`, `completed`, `failed`) and idempotent retry limits.
-- **C05 — Audit & Version History**: Record an explicit audit log for imports, model/prompt versions, reviewer actions (accept/reject/correct), and Jira exports with actor ID and timestamp.
+- **C05 — Audit & Version History**: Record an explicit audit log for imports, model/prompt versions, reviewer actions (accept/reject/correct), Jira exports, **and every Platform Owner access to client or billing data**, with actor ID and timestamp.
 - **C06 — Usage & Quotas**: Track job runs, storage volume, and token usage per tenant; enforce quota limits.
 - **C07 — Operational Readiness**: Health check routes, error logging/alerts, cost ceilings, and backup/restore capabilities.
 - **C08 — Model Transparency**: Store provider/model details and prompt versions; display confidence levels alongside supporting and conflicting evidence.
 
 ---
 
-## 4. UI/UX Styling Rules
-Strictly adhere to the NVIDIA-inspired design guidelines:
-- **Color Palette**: Restricted strictly to **Blue** (Corporate/Tech primary accent) and **White** (Pure white `#FFFFFF` / clean slate backgrounds `#F8FAFC`).
-- **NO GRADIENTS**: Zero color gradients permitted anywhere in the UI. Use flat solid fills, crisp borders, and subtle overlays.
-- **Typography & Layout**: High-density data tables, generous spacing, clear visual hierarchy, bold headings, and explicit status badges.
+## 4. UI/UX Styling Rules  *(changed: Ivory design system, token prefix and mark renamed)*
+Strictly adhere to the NVIDIA-inspired design guidelines, applied through the Ivory design system below. The look is clean, bright and professional, in the spirit of Google's own web products: generous white space, a calm blue accent, crisp type, and nothing decorative. It must be unique and instantly recognisable while using only two colours.
+
+### 4.1 Two-colour rule
+- **Colour 1: Blue.** The only accent colour. Flat shades and tints of this one blue are allowed.
+- **Colour 2: White.** Pure white `#FFFFFF` and clean backgrounds `#F8FAFD`.
+- **Neutrals** (near-black text and light cool greys for borders and secondary text) are allowed and do not count as colours.
+- **NO RED. NO GREEN.** No other hues at all (also no amber, orange, purple, yellow). Errors, success, warnings and failures are communicated by **icon, label and shape**, never by red or green.
+- **NO GRADIENTS**: Zero gradients anywhere (backgrounds, buttons, charts, hero sections, loaders). Use flat solid fills, crisp borders and subtle flat overlays.
+
+### 4.2 Colour tokens (single source in `frontend/src/theme/`)
+| Token | Value | Use |
+|---|---|---|
+| `--iv-blue` | `#1A73E8` | Primary accent: primary buttons, links, active tab, focus ring |
+| `--iv-blue-hover` | `#1765CC` | Hover and pressed |
+| `--iv-blue-deep` | `#174EA6` | Strong emphasis, headings that need accent, selected text |
+| `--iv-blue-100` | `#D2E3FC` | Selected state, active chips (flat tint) |
+| `--iv-blue-50` | `#E8F0FE` | Row hover, panels, info banners (flat tint) |
+| `--iv-white` | `#FFFFFF` | Cards, surfaces, inputs |
+| `--iv-bg` | `#F8FAFD` | Page background |
+| `--iv-text` | `#202124` | Primary text (neutral) |
+| `--iv-text-2` | `#5F6368` | Secondary text (neutral) |
+| `--iv-border` | `#DADCE0` | 1px borders and dividers (neutral) |
+
+Tokens are defined once; components must reference tokens, never raw hex values. (`--iv-` = Ivory prefix; it replaces the old `--fs-` prefix.)
+
+### 4.3 Unique signature (what makes it RootTrace Ivory)
+- **Evidence Rail**: a persistent right-hand panel on every failure that lists source citations. Clicking one scrolls to and highlights the exact line in the evidence viewer.
+- **Confidence Meter**: a segmented bar made of 10 flat blocks (filled blue vs outlined) with the percentage as text. Never a gradient bar.
+- **Trace Ring**: the brand mark is a flat blue ring with a notch and a single trace line leaving it (root cause traced back to its source); reused as the loading indicator (rotating flat ring) and the empty-state illustration.
+- **Case-file layout**: each failure opens as a "case file" with a bold title, a status strip, then tabs (Evidence, Diagnosis, History, Export).
+- **Taxonomy chips**: the 6 categories are shown as flat chips distinguished by icon and label (filled vs outlined vs dashed border), not by colour.
+- **Search-first header**: a wide, prominent search bar at the top of the app (find a run, test or failure signature), in the clean Google-style manner.
+
+### 4.4 Typography, layout and components
+- Typography: **Inter** (or Roboto) for the interface and a monospace for logs and stack traces. Bold headings, 4 clear sizes, strong hierarchy.
+- Layout: lots of white space, light top bar, left navigation, content on white cards over the `--iv-bg` background.
+- High-density data tables with sticky headers; row hover is a flat `--iv-blue-50` tint.
+- Shape: pill-shaped (fully rounded) primary buttons, 8px radius on inputs and cards, 1px `--iv-border` borders, very light flat shadows only (no glow, no gradient shadow).
+- Explicit status badges, always **icon plus text**, no red or green:
+  - `queued`: outlined badge, clock icon.
+  - `processing`: blue-tint badge, spinning ring icon.
+  - `completed`: filled blue badge, check icon.
+  - `failed`: white badge with deep-blue border, cross icon and the word "Failed".
+  - Warnings and errors in forms: deep-blue text with an alert icon and a left border bar.
+- Motion (Framer Motion): short (150 to 250 ms), purposeful transitions only (panel slide, row expand). Respect `prefers-reduced-motion`.
+- States: every screen has loading, empty, error and access-denied states in the same two-colour style.
+- Accessibility: text/background contrast at least WCAG AA, visible focus rings (2px `--iv-blue`), full keyboard navigation, never rely on colour alone.
+- Responsive: desktop-first, usable on tablet and mobile widths.
 
 ---
 
@@ -47,26 +93,27 @@ Strictly adhere to the NVIDIA-inspired design guidelines:
 - **Backend**: FastAPI (Python 3.11+), SQLAlchemy ORM, Alembic, Pydantic v2
 - **Frontend**: React, TypeScript, Vite, Tailwind CSS / Chakra UI, Framer Motion
 - **Database**: PostgreSQL 15+
-- **Auth**: JWT + Google OAuth
+- **Auth**: JWT + Google OAuth (MFA required for Platform Owner)
 - **AI Adapter**: OpenAI API with structured JSON output enforcement
 - **DevOps**: Docker Compose (Localhost), GitHub Actions (CI/CD)
 
 ---
 
-## 6. Project Directory Layout
+## 6. Project Directory Layout  *(changed: root folder renamed)*
 
 ```text
-failscope-ai/
+roottrace-ivory/
 ├── .github/
 │   └── workflows/          # CI/CD pipelines (GitHub Actions)
 ├── backend/
 │   ├── alembic/            # Database migration scripts
 │   ├── app/
 │   │   ├── api/            # FastAPI routers (v1 endpoints)
+│   │   │   └── owner/      # Platform Owner endpoints (clients, billing report)
 │   │   ├── core/           # Configuration, security, database session
-│   │   ├── models/         # Tenant-scoped SQLAlchemy ORM models
+│   │   ├── models/         # Tenant-scoped SQLAlchemy ORM models (+ plans, billing records)
 │   │   ├── schemas/        # Pydantic request/response models
-│   │   ├── services/       # Core business logic (Parser, LLM adapter, Jira exporter)
+│   │   ├── services/       # Core business logic (Parser, LLM adapter, Jira exporter, billing)
 │   │   └── utils/          # Credential redaction, hashing, artifact scanners
 │   ├── tests/              # Backend unit and integration tests
 │   ├── Dockerfile
@@ -77,8 +124,9 @@ failscope-ai/
 │   │   ├── components/     # Reusable UI components
 │   │   ├── layouts/        # Dashboard layout shells
 │   │   ├── pages/          # Application view screens
+│   │   │   └── owner/      # Platform Owner dashboard and billing report pages
 │   │   ├── services/       # API client bindings (Axios)
-│   │   └── theme/          # Blue & White color tokens & global styles
+│   │   └── theme/          # Blue & White color tokens (--iv-*) & global styles
 │   ├── package.json
 │   ├── vite.config.ts
 │   └── Dockerfile
@@ -89,10 +137,10 @@ failscope-ai/
 
 ---
 
-## 7. Local Development URLs
+## 7. Local Development URLs  *(changed: product name and legacy-names note)*
 
 Ports are shifted off the usual defaults (5432/8000/5173) because another unrelated
-project on this machine already holds those. FailScope AI runs under its own compose
+project on this machine already holds those. RootTrace Ivory runs under its own compose
 project name (`failscope-ai`) on:
 
 | Service | URL |
@@ -102,6 +150,8 @@ project name (`failscope-ai`) on:
 | Backend interactive docs | http://localhost:8010/docs |
 | Postgres | localhost:5433 (db `failscope`, user/pass `failscope`) |
 | Redis | localhost:6380 |
+
+> **Legacy technical names:** the compose project name (`failscope-ai`) and the Postgres database/user (`failscope`) come from the old product name. They are kept unchanged for now so the running stack, volumes and backups keep working. Renaming them to `roottrace-ivory` / `roottrace` is a planned, separate task: back up first (Section 8), rename, restore, and verify. Do not rename them as part of ordinary feature work.
 
 **Running it:**
 ```bash
@@ -149,7 +199,7 @@ bash scripts/restore.sh <ts>             # restores that pair, replacing current
 
 ## 9. Environments
 
-FailScope AI uses separate environments. Databases, object storage, credentials, OpenAI keys and Jira connections are never shared between them.
+RootTrace Ivory uses separate environments. Databases, object storage, credentials, OpenAI keys and Jira connections are never shared between them.
 
 | Environment | Purpose | Data | Where it runs |
 |---|---|---|---|
@@ -186,9 +236,16 @@ Map every requirement (F-series features and C01 - C08 controls) to at least one
 
 ### 10.2 Role, tenant and access testing (C01, C02)
 - Test both the **visible UI permissions** and **direct backend requests** (API called without going through the UI).
-- Cover all four roles: `Admin`, `Analyst/Operator`, `Reviewer`, `Viewer`, against every endpoint (permission matrix: view, create, edit, delete, approve, export, administer).
+- Cover all five roles: `Platform Owner`, `Admin`, `Analyst/Operator`, `Reviewer`, `Viewer`, against every endpoint (permission matrix: view, create, edit, delete, approve, export, administer).
 - Cross-tenant tests: tenant A must not be able to read, modify, export or search tenant B's runs, test results, artifacts (files), diagnoses, defects, audit logs or AI context. Server-side validation must reject these with the correct status code.
 - Object storage paths and download URLs must be tenant-scoped and must not be guessable or reusable across tenants.
+- **Platform Owner tests:**
+  - Every owner endpoint returns 403 for `Admin`, `Analyst/Operator`, `Reviewer` and `Viewer`, both through the UI and direct API calls.
+  - Owner menu and pages are not visible to any other role.
+  - MFA is enforced; a Platform Owner session without MFA is rejected.
+  - Every Platform Owner access to client or billing data creates an audit entry (C05).
+  - Platform Owner cannot read any tenant's artifacts, logs, screenshots, diagnoses or AI context (C01 exception stays narrow).
+  - Platform Owner cannot be created through public signup or by any tenant Admin.
 
 ### 10.3 AI behaviour testing (C03, C08, Pilot Gate)
 Use a repeatable evaluation dataset, never ad-hoc prompts.
@@ -212,14 +269,17 @@ Use a repeatable evaluation dataset, never ad-hoc prompts.
   4. Reviewer accepts, rejects or corrects a category (audit entry created).
   5. Export a defect to Jira -> exported once only (idempotent).
   6. Access-denied journey for a role or tenant without permission.
+  7. Platform Owner signs in with MFA -> opens client list -> opens billing report -> audit entries exist.
 
 ### 10.5 Non-functional testing
 - **Security**: dependency scanning, secret scanning, authentication and authorization checks, file-upload validation (type, size, content), injection and XSS checks, encryption in transit and at rest verification (C03).
 - **Performance**: measure against set targets (for example import time for large runs, API latency, concurrent jobs); run in staging, not on a laptop.
-- **Accessibility**: keyboard navigation, contrast, labels and focus states on all screens, consistent with the blue and white design rules in Section 4.
+- **Accessibility**: keyboard navigation, contrast, labels and focus states on all screens, consistent with the two-colour design rules in Section 4.
+- **UI design compliance**: automated check that no gradient (`linear-gradient`, `radial-gradient`, `conic-gradient`) and no colour outside the Section 4.2 tokens (in particular no red or green) appears in the frontend source or built CSS; visual regression snapshots of key screens.
+- **Branding check (new)**: automated search that the old names ("FailScope", "Scope Ring", `--fs-`) do not appear in user-facing UI text, docs or marketing pages (the legacy technical names in Section 7 are the only allowed exception until the planned rename).
 - **Browser and device**: latest Chrome, Edge, Firefox and Safari; responsive checks on mobile and tablet widths.
 - **Operational readiness (C07)**: health-check routes, error logging and alerts, cost ceilings, and **backup and restore** (verified 2026-10-12; repeat after infrastructure changes and periodically).
-- **Audit (C05)**: verify audit records exist with actor ID and timestamp for imports, model and prompt versions, reviewer actions and Jira exports.
+- **Audit (C05)**: verify audit records exist with actor ID and timestamp for imports, model and prompt versions, reviewer actions, Jira exports and Platform Owner access.
 
 ### 10.6 Defect retesting and regression
 - After every fix: verify the original issue, test the affected areas, and run the critical automated E2E journeys.
@@ -227,7 +287,7 @@ Use a repeatable evaluation dataset, never ad-hoc prompts.
 - Record the root cause for each production-impacting defect (blameless post-mortem).
 
 ### 10.7 Payments and subscriptions (future, after pilot validation)
-Not in the current scope. When subscriptions are added, test: successful and failed payments, renewal, cancellation, expiry, refunds, and duplicate or delayed webhooks. Access must change only through **verified server-side payment events**, using test payment credentials in dev and staging.
+Not in the current scope. When subscriptions are added, test: successful and failed payments, renewal, cancellation, expiry, refunds, and duplicate or delayed webhooks. Access must change only through **verified server-side payment events**, using test payment credentials in dev and staging. Until then, billing data is manual or placeholder (Section 16) and is covered by the billing report tests in Section 15.
 
 ---
 
@@ -280,6 +340,77 @@ A change is done only when:
 - [ ] Secrets are redacted (C03) and no credentials are committed.
 - [ ] Audit entries are written where required (C05).
 - [ ] Alembic migration reviewed and tested up and down.
-- [ ] UI follows Section 4 (blue and white only, no gradients) and has loading, empty, error and access-denied states.
+- [ ] UI follows Section 4 (two colours, flat, no gradients) and has loading, empty, error and access-denied states.
+- [ ] No old product name appears in user-facing text (Section 10.5 branding check).
 - [ ] CI checks in Section 11 pass.
 - [ ] Documentation (this file, README, requirements) is updated.
+
+---
+
+## 14. Company & Brand  *(changed: Ivory brand, RootTrace Ivory product)*
+
+| Item | Value |
+|---|---|
+| Product name | **RootTrace Ivory** (formerly FailScope AI) |
+| Brand / company name | **Ivory** (current brand; legal company name to be finalised later) |
+| Unique brand word | **Ivory**, used in every product name |
+| Naming pattern | `<ProductName> Ivory` (for example "RootTrace Ivory") |
+| Website / domain | TBD (to be created on Hostinger after the name is cleared) |
+| Source repository | https://github.com/CibiChakravarthyK4/RootTrace_Ivory |
+| Product family (proposed) | RootTrace Ivory (test failure investigator), AgentTrace Ivory (agent and MCP test lab), StayTrace Ivory (hotel booking and billing reconciliation) |
+
+Rules:
+- Every product and website name carries the brand word "Ivory".
+- The name "AI" is not part of any product name.
+- The legal company name, once decided, must be added here and used in the UI footer, legal pages and documentation.
+- Brand colours are Blue and White (Section 4.1) only, with neutrals for text and borders.
+- Name clearance is still open: domains on Hostinger, Indian and WIPO trademark search, and a web search for "RootTrace" and "Ivory" with "testing" or "QA".
+
+---
+
+## 15. Platform Owner Role & Dashboard
+
+The `Platform Owner` is the product owner's own account. It sits above `Admin`, belongs to no tenant, and exists only for the owner.
+
+### Access
+- Same application and same login page. The owner menu and routes appear only when the signed-in user has the `Platform Owner` role.
+- Created only through a controlled setup process (seed script or protected CLI). Never through public signup, and never by a tenant `Admin`.
+- **MFA is mandatory.** All permissions are checked server-side on every `/api/v1/owner/*` endpoint.
+
+### What the Platform Owner can see
+- All client (tenant) accounts: name, status, created date, admins.
+- Plan, price, purchase date, renewal or expiry date, and subscription status for each client.
+- Usage per client: job runs, storage volume, token usage and quota status (C06).
+- Payment and billing details and a **billing report** (revenue, outstanding, renewals due, expiries, usage by client), with export to CSV.
+
+### What the Platform Owner cannot see
+- Any tenant's test artifacts, logs, screenshots, diagnoses, AI context or defect content (the C01 exception is limited to account, plan, usage and billing data).
+
+### Client data protection (decision recorded)
+How much client data the Platform Owner can reach was decided as follows:
+
+| Option | Platform Owner sees | Status |
+|---|---|---|
+| **A. Account and billing data only** | Client name, plan, price, dates, status, usage counts, billing report. No test artifacts, logs, screenshots, diagnoses or AI context. | **Chosen default** |
+| B. Account data plus aggregated, anonymised usage statistics | Option A plus totals such as failure counts per category, with no content | Allowed later, add to this section if approved |
+| C. Support access with consent ("break-glass") | Temporary, read-only view of one tenant's data | Not enabled. Only with explicit approval from that tenant's Admin, time-limited, scoped to that tenant and fully audited (C05) |
+
+Everything beyond option A needs the tenant Admin's consent and a documented change to this file first.
+
+### Controls
+- Every access to client or billing data is written to the audit log with actor ID and timestamp (C05).
+- Owner endpoints are rate limited and covered by the tests in Section 10.2 and E2E journey 7 in Section 10.4.
+- Owner UI follows the same two-colour design system (Section 4).
+
+---
+
+## 16. Billing & Payments
+
+- **Now (pre-release):** billing and payment records are manual or placeholder data stored per tenant (plan, price, dates, status, payment reference, notes). No payment provider is integrated.
+- **At release:** choose a payment provider (for example Razorpay for India or Stripe) and add subscription, trial, renewal, cancellation, refund and expiry rules.
+- Rules once a provider is added:
+  - Use test credentials in development and staging; live keys only in production.
+  - Keep payment keys on the server only, never in GitHub or in the frontend.
+  - Change a tenant's access only through **verified server-side payment events** (signed webhooks). Handle duplicate and delayed webhooks idempotently.
+  - Billing data shown to the `Platform Owner` is read from the same records the provider updates.
+- Related tests: Section 10.7.
