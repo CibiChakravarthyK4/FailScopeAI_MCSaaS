@@ -3,6 +3,7 @@ import { Navbar } from '../components/layout/Navbar';
 import { PageWrapper } from '../components/layout/PageWrapper';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import { FormMessage } from '../components/ui/FormMessage';
 import { getUsage, type Usage } from '../services/dashboardService';
 import { getBillingStatus, startCheckout, type BillingStatus } from '../services/billingService';
 
@@ -71,7 +72,7 @@ export function SettingsPage() {
               ) : (
                 <p className="text-sm text-muted">Billing isn't set up for this workspace yet.</p>
               )}
-              {checkoutError && <p className="text-sm text-red-600">{checkoutError}</p>}
+              {checkoutError && <FormMessage>{checkoutError}</FormMessage>}
             </Card>
 
             <Card className="space-y-3">

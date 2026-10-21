@@ -5,6 +5,7 @@ import { PageWrapper } from '../components/layout/PageWrapper';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
+import { FormMessage } from '../components/ui/FormMessage';
 import { importRun } from '../services/runService';
 
 export function RunImportPage() {
@@ -78,7 +79,7 @@ export function RunImportPage() {
                 className="w-full rounded-md border border-line px-3 py-2 text-sm"
               />
             </div>
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && <FormMessage>{error}</FormMessage>}
             <Button type="submit" isLoading={isLoading}>
               Import
             </Button>

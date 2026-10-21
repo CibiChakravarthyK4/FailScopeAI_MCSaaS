@@ -1,0 +1,5 @@
+2026-10-21T10:00:00Z ERROR checkout service returned 500
+Traceback (most recent call last):
+  File "tests/checkout_test.py", line 42, in test_checkout_flow
+    assert response.status_code == 200
+AssertionError: expected 200 but got 500

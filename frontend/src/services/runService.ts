@@ -1,5 +1,5 @@
 import api from './api';
-import type { Run, RunDetail, Evidence } from '../types';
+import type { Run, RunDetail, Evidence, HistoryEntry } from '../types';
 
 export async function listRuns(): Promise<Run[]> {
   const { data } = await api.get<Run[]>('/api/runs');
@@ -13,6 +13,11 @@ export async function getRun(runId: number): Promise<RunDetail> {
 
 export async function getEvidence(runId: number, testCaseId: number): Promise<Evidence> {
   const { data } = await api.get<Evidence>(`/api/runs/${runId}/tests/${testCaseId}/evidence`);
+  return data;
+}
+
+export async function getHistory(runId: number, testCaseId: number): Promise<HistoryEntry[]> {
+  const { data } = await api.get<HistoryEntry[]>(`/api/runs/${runId}/tests/${testCaseId}/history`);
   return data;
 }
 

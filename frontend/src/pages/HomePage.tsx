@@ -94,7 +94,7 @@ export function HomePage() {
       <header className="border-b border-line">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
           <span className="text-lg font-semibold text-ink">
-            FailScope <span className="text-brand-blue">AI</span>
+            RootTrace <span className="text-brand-blue">Ivory</span>
           </span>
           <div className="flex items-center gap-3">
             <Link to="/login">
@@ -112,13 +112,13 @@ export function HomePage() {
       <main>
         <section className="mx-auto max-w-4xl px-6 py-24 text-center">
           <span className="mb-5 inline-block rounded-full border border-line bg-brand-blue-light px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-blue">
-            AI Test Failure Investigator
+            Test Failure Investigator
           </span>
           <h1 className="text-4xl font-semibold leading-tight text-ink sm:text-5xl">
             Investigate failed tests with AI —<br className="hidden sm:block" /> not guesswork.
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg text-muted">
-            FailScope AI ingests your JUnit failures, correlates the evidence, and gives your team an
+            RootTrace Ivory ingests your JUnit failures, correlates the evidence, and gives your team an
             evidence-backed root cause in minutes — reviewed and confirmed by a human before it ever becomes a
             defect.
           </p>
@@ -195,7 +195,7 @@ export function HomePage() {
 
       <footer className="border-t border-line">
         <div className="mx-auto max-w-6xl px-6 py-8 text-center text-sm text-muted">
-          FailScope AI — AI Test Failure Investigator
+          RootTrace Ivory — Test Failure Investigator
         </div>
       </footer>
     </div>

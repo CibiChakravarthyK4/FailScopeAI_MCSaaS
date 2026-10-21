@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
+import { FormMessage } from '../ui/FormMessage';
 import { GoogleSignInButton } from './GoogleSignInButton';
 
 export function LoginForm() {
@@ -45,7 +46,7 @@ export function LoginForm() {
         required
         autoComplete="current-password"
       />
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <FormMessage>{error}</FormMessage>}
       <Button type="submit" isLoading={isLoading}>
         Sign in
       </Button>

@@ -1,0 +1,16 @@
+/* Single source of color tokens (CLAUDE.md Section 4.2). tailwind.config.js
+reads every one of these via var(--iv-*) - change a value here, not there.
+"iv" = Ivory, the brand word (CLAUDE.md 14); this replaced the old "fs" prefix
+when the product was renamed from FailScope AI to RootTrace Ivory. */
+:root {
+  --iv-blue: #1a73e8;
+  --iv-blue-hover: #1765cc;
+  --iv-blue-deep: #174ea6;
+  --iv-blue-100: #d2e3fc;
+  --iv-blue-50: #e8f0fe;
+  --iv-white: #ffffff;
+  --iv-bg: #f8fafd;
+  --iv-text: #202124;
+  --iv-text-2: #5f6368;
+  --iv-border: #dadce0;
+}

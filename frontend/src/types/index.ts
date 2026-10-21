@@ -53,6 +53,16 @@ export interface Artifact {
 export interface Evidence {
   test_case: TestCase;
   artifacts: Artifact[];
+  diagnoses: Diagnosis[];
+}
+
+export interface HistoryEntry {
+  action: string;
+  actor_email: string | null;
+  entity_type: string;
+  entity_id: number | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
 }
 
 export type FailureCategory =
@@ -66,6 +76,7 @@ export type FailureCategory =
 export interface Diagnosis {
   id: number;
   test_case_id: number;
+  run_id: number;
   category: FailureCategory;
   confidence_score: number;
   evidence: { citations: string[]; secrets_redacted: number };

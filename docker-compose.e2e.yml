@@ -1,0 +1,26 @@
+name: failscope-ai
+
+# Overlay for E2E runs: `docker compose -f docker-compose.yml -f docker-compose.e2e.yml up`.
+# Adds a stub OpenAI-compatible endpoint so the "Investigate with AI" journey
+# is testable without a real OPENAI_API_KEY (see e2e/fake-openai-server.py).
+services:
+  ai-stub:
+    image: python:3.11-alpine
+    volumes:
+      - ./e2e/fake-openai-server.py:/app/fake-openai-server.py:ro
+    command: ["python", "/app/fake-openai-server.py"]
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('localhost', 8080), 2)"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+
+  backend:
+    environment:
+      OPENAI_API_KEY: e2e-stub-key
+      OPENAI_BASE_URL: http://ai-stub:8080/v1
+    depends_on:
+      ai-stub:
+        condition: service_healthy

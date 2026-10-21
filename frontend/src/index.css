@@ -1,10 +1,12 @@
+@import './theme/tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 html,
 body {
-  background-color: #ffffff;
-  color: #1b1f26;
+  background-color: var(--iv-bg);
+  color: var(--iv-text);
   font-family: 'Inter', system-ui, sans-serif;
 }

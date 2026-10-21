@@ -9,7 +9,7 @@ export function RegisterPage() {
       <div className="w-full max-w-md px-6">
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-semibold text-ink">
-            FailScope <span className="text-brand-blue">AI</span>
+            RootTrace <span className="text-brand-blue">Ivory</span>
           </h1>
           <p className="mt-1 text-sm text-muted">Create your workspace</p>
         </div>

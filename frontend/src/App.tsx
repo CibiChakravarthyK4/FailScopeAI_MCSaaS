@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
+import { OwnerAuthProvider } from './context/OwnerAuthContext';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { OwnerProtectedRoute } from './components/auth/OwnerProtectedRoute';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { AuthCallbackPage } from './pages/AuthCallbackPage';
@@ -10,14 +12,15 @@ import { DashboardPage } from './pages/DashboardPage';
 import { RunsListPage } from './pages/RunsListPage';
 import { RunImportPage } from './pages/RunImportPage';
 import { RunDetailPage } from './pages/RunDetailPage';
-import { EvidencePage } from './pages/EvidencePage';
-import { DiagnosisPage } from './pages/DiagnosisPage';
+import { CaseFilePage } from './pages/CaseFilePage';
+import { DiagnosisRedirectPage } from './pages/DiagnosisRedirectPage';
 import { GroupsPage } from './pages/GroupsPage';
 import { ReviewQueuePage } from './pages/ReviewQueuePage';
 import { ExportDraftPage } from './pages/ExportDraftPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { HomePage } from './pages/HomePage';
-import { PlatformDashboardPage } from './pages/PlatformDashboardPage';
+import { OwnerLoginPage } from './pages/owner/OwnerLoginPage';
+import { OwnerDashboardPage } from './pages/owner/OwnerDashboardPage';
 
 const queryClient = new QueryClient();
 
@@ -25,6 +28,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+      <OwnerAuthProvider>
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
@@ -74,7 +78,7 @@ export default function App() {
               path="/runs/:runId/tests/:testCaseId"
               element={
                 <ProtectedRoute>
-                  <EvidencePage />
+                  <CaseFilePage />
                 </ProtectedRoute>
               }
             />
@@ -82,7 +86,7 @@ export default function App() {
               path="/diagnoses/:diagnosisId"
               element={
                 <ProtectedRoute>
-                  <DiagnosisPage />
+                  <DiagnosisRedirectPage />
                 </ProtectedRoute>
               }
             />
@@ -118,17 +122,19 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="/owner/login" element={<OwnerLoginPage />} />
             <Route
-              path="/platform"
+              path="/owner"
               element={
-                <ProtectedRoute>
-                  <PlatformDashboardPage />
-                </ProtectedRoute>
+                <OwnerProtectedRoute>
+                  <OwnerDashboardPage />
+                </OwnerProtectedRoute>
               }
             />
             <Route path="/" element={<HomePage />} />
           </Routes>
         </BrowserRouter>
+      </OwnerAuthProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

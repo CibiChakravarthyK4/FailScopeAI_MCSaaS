@@ -4,6 +4,7 @@ import { Navbar } from '../components/layout/Navbar';
 import { PageWrapper } from '../components/layout/PageWrapper';
 import { Card } from '../components/ui/Card';
 import { ConfidenceMeter } from '../components/ui/ConfidenceMeter';
+import { TaxonomyChip } from '../components/ui/TaxonomyChip';
 import { listPendingDiagnoses } from '../services/diagnosisService';
 import type { DiagnosisListItem } from '../types';
 
@@ -38,8 +39,8 @@ export function ReviewQueuePage() {
                 className="flex items-center justify-between gap-6 px-6 py-4 hover:bg-brand-blue-light"
               >
                 <div>
-                  <p className="font-medium text-ink">{item.test_case_name}</p>
-                  <p className="text-sm capitalize text-muted">{item.category.replace(/_/g, ' ')}</p>
+                  <p className="mb-1.5 font-medium text-ink">{item.test_case_name}</p>
+                  <TaxonomyChip category={item.category} />
                 </div>
                 <div className="w-32">
                   <ConfidenceMeter score={item.confidence_score} />
