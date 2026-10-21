@@ -18,7 +18,14 @@ from app.routers import (
     runs,
 )
 
-app = FastAPI(title=settings.APP_NAME, version="1.0.0")
+_is_production = settings.APP_ENV == "production"
+app = FastAPI(
+    title=settings.APP_NAME,
+    version="1.0.0",
+    docs_url=None if _is_production else "/docs",
+    redoc_url=None if _is_production else "/redoc",
+    openapi_url=None if _is_production else "/openapi.json",
+)
 
 app.add_middleware(MaxBodySizeMiddleware, max_bytes=settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024)
 
@@ -51,4 +58,4 @@ app.include_router(platform.router)
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy"}
+    return {"status": "healthy", "environment": settings.APP_ENV}

@@ -1,8 +1,11 @@
+from typing import Literal
+
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     APP_NAME: str = "FailScope AI"
+    APP_ENV: Literal["development", "staging", "production", "demo"] = "development"
     DATABASE_URL: str
     REDIS_URL: str = "redis://localhost:6379/0"
 

@@ -325,3 +325,21 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_tenants_id'), table_name='tenants')
     op.drop_table('tenants')
     # ### end Alembic commands ###
+
+    # Alembic's autogenerate doesn't emit DROP TYPE for the Postgres ENUM types
+    # backing each Enum column - op.drop_table only drops the table, leaving the
+    # type behind. Without this, downgrade-then-upgrade fails on "type already
+    # exists" the next time a table using one of these enums is created.
+    for enum_name in (
+        "userrole",
+        "runstatus",
+        "testcasestatus",
+        "artifacttype",
+        "jobtype",
+        "jobstatus",
+        "failurecategory",
+        "diagnosisstatus",
+        "reviewaction",
+        "exportstatus",
+    ):
+        op.execute(f"DROP TYPE IF EXISTS {enum_name}")
