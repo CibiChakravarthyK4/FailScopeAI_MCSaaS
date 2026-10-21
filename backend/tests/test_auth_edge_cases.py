@@ -85,7 +85,7 @@ def test_google_callback_second_login_reuses_same_user(client, monkeypatch):
         location = resp.headers["location"]
         return location.split("access_token=")[1].split("&")[0]
 
-    from jose import jwt
+    import jwt
 
     from app.config import settings
 

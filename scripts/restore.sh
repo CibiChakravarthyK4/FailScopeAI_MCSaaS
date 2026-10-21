@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# Restores the FailScope AI database and artifacts from a backup pair.
+# Restores the RootTrace Ivory database and artifacts from a backup pair.
+# NOTE: container/db/volume names below are the old "failscope" identifiers,
+# kept deliberately (CLAUDE.md Section 7) - renaming them is a planned,
+# separate task, not part of ordinary feature work.
 # Usage: scripts/restore.sh <timestamp>
 #   where <timestamp> matches backups/db_<timestamp>.dump and backups/artifacts_<timestamp>.tar.gz
 set -euo pipefail

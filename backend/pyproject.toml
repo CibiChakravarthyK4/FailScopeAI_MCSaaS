@@ -4,3 +4,8 @@ line-length = 120
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "BLE"]
 ignore = ["B008"]  # Depends(...) in defaults is the standard FastAPI DI pattern
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+python_version = "3.11"
+warn_unused_ignores = true

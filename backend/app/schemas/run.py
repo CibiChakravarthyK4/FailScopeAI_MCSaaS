@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
+from app.schemas.diagnosis import DiagnosisResponse
+
 
 class TestCaseResponse(BaseModel):
     id: int
@@ -46,6 +48,7 @@ class ArtifactResponse(BaseModel):
 class EvidenceResponse(BaseModel):
     test_case: TestCaseResponse
     artifacts: list[ArtifactResponse]
+    diagnoses: list[DiagnosisResponse]
 
 
 class JobResponse(BaseModel):

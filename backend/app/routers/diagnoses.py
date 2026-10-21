@@ -22,7 +22,7 @@ def list_diagnoses(
     user: User = Depends(get_current_user),
 ):
     query = (
-        db.query(Diagnosis, TestCase.name)
+        db.query(Diagnosis, TestCase.name, TestCase.run_id)
         .join(TestCase, TestCase.id == Diagnosis.test_case_id)
         .filter(Diagnosis.tenant_id == user.tenant_id)
     )
@@ -30,10 +30,21 @@ def list_diagnoses(
         query = query.filter(Diagnosis.status == status)
 
     results = []
-    for diagnosis, test_case_name in query.order_by(Diagnosis.created_at.desc()).all():
-        results.append(
-            DiagnosisListItem(test_case_name=test_case_name, **DiagnosisResponse.model_validate(diagnosis).model_dump())
+    for diagnosis, test_case_name, run_id in query.order_by(Diagnosis.created_at.desc()).all():
+        response = DiagnosisResponse(
+            id=diagnosis.id,
+            test_case_id=diagnosis.test_case_id,
+            run_id=run_id,
+            category=diagnosis.category,
+            confidence_score=diagnosis.confidence_score,
+            evidence=diagnosis.evidence,
+            model_provider=diagnosis.model_provider,
+            model_name=diagnosis.model_name,
+            prompt_version=diagnosis.prompt_version,
+            status=diagnosis.status,
+            created_at=diagnosis.created_at,
         )
+        results.append(DiagnosisListItem(test_case_name=test_case_name, **response.model_dump()))
     return results
 
 
@@ -50,7 +61,7 @@ def run_diagnosis(
         diagnosis = diagnosis_service.run_investigation(db, user.tenant_id, user.id, test_case_id)
     except AppException as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
-    return diagnosis
+    return diagnosis_service.to_response(db, diagnosis)
 
 
 @router.get("/{diagnosis_id}", response_model=DiagnosisResponse)
@@ -62,7 +73,7 @@ def get_diagnosis(diagnosis_id: int, db: Session = Depends(get_db), user: User =
     )
     if not diagnosis:
         raise HTTPException(status_code=404, detail="Diagnosis not found")
-    return diagnosis
+    return diagnosis_service.to_response(db, diagnosis)
 
 
 @router.post("/{diagnosis_id}/review", response_model=ReviewResponse)

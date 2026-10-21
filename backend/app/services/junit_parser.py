@@ -57,7 +57,7 @@ def parse_junit_xml(content: bytes) -> list[ParsedTestCase]:
             status = "skipped"
             stack_trace = skipped.get("message")
         else:
-            continue  # passed test cases are not failures; FailScope only tracks failures
+            continue  # passed test cases are not failures; RootTrace Ivory only tracks failures
 
         started_at = None
         timestamp = tc.get("timestamp")

@@ -66,7 +66,10 @@ class DiagnosisResult:
 def _client() -> OpenAI:
     if not settings.OPENAI_API_KEY:
         raise AppException("AI provider is not configured (missing OPENAI_API_KEY)", "NOT_CONFIGURED", 503)
-    return OpenAI(api_key=settings.OPENAI_API_KEY)
+    # OPENAI_BASE_URL lets this point at an OpenAI-compatible endpoint instead of
+    # the real API - used by the E2E suite's stub provider (see e2e/README.md)
+    # so the full "Investigate with AI" journey is testable without a real key.
+    return OpenAI(api_key=settings.OPENAI_API_KEY, base_url=settings.OPENAI_BASE_URL or None)
 
 
 def investigate(
@@ -96,7 +99,10 @@ def investigate(
         },
     )
 
-    parsed = json.loads(response.choices[0].message.content)
+    content = response.choices[0].message.content
+    if content is None:
+        raise AppException("AI provider returned an empty response", "AI_EMPTY_RESPONSE", 502)
+    parsed = json.loads(content)
     usage = response.usage
     tokens_in = usage.prompt_tokens if usage else 0
     tokens_out = usage.completion_tokens if usage else 0

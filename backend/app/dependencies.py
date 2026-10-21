@@ -3,8 +3,8 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from app.auth.jwt import decode_token
-from app.config import settings
 from app.database import get_db
+from app.models.platform_owner import PlatformOwner
 from app.models.user import User, UserRole
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
@@ -34,12 +34,16 @@ def require_role(*roles: UserRole):
     return dependency
 
 
-def require_platform_owner(user: User = Depends(get_current_user)) -> User:
-    """Platform-owner access (the SaaS operator, across all tenants) is driven by
-    a config allowlist rather than a DB flag - there's no bootstrapping chicken-
-    and-egg problem (no existing superuser needed to grant the first one), and it
-    can't be escalated to by mutating application data."""
-    owner_emails = {e.strip().lower() for e in settings.PLATFORM_OWNER_EMAILS.split(",") if e.strip()}
-    if user.email.lower() not in owner_emails:
+def get_current_owner(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> PlatformOwner:
+    """Platform Owner sessions are a wholly separate identity from tenant users
+    (app/models/platform_owner.py) - a tenant user token, however it was
+    obtained, can never satisfy this dependency, because the token's own
+    "scope" claim (set only by create_owner_access_token) is checked first."""
+    payload = decode_token(token)
+    if not payload or payload.get("type") != "access" or payload.get("scope") != "platform_owner":
         raise HTTPException(status_code=403, detail="Platform owner access required")
-    return user
+
+    owner = db.query(PlatformOwner).filter(PlatformOwner.id == int(payload["sub"])).first()
+    if not owner or not owner.is_active:
+        raise HTTPException(status_code=403, detail="Platform owner access required")
+    return owner

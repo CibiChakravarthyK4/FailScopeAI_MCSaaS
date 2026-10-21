@@ -1,7 +1,7 @@
 import enum
 
-from sqlalchemy import Column, Enum, ForeignKey, Integer, Text
-from sqlalchemy.orm import relationship
+from sqlalchemy import Enum, ForeignKey, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 from app.models.base import TimestampMixin
@@ -17,12 +17,14 @@ class ReviewAction(str, enum.Enum):
 class Review(Base, TimestampMixin):
     __tablename__ = "reviews"
 
-    id = Column(Integer, primary_key=True, index=True)
-    tenant_id = Column(Integer, ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
-    diagnosis_id = Column(Integer, ForeignKey("diagnoses.id", ondelete="CASCADE"), nullable=False, index=True)
-    reviewer_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    action = Column(Enum(ReviewAction), nullable=False)
-    corrected_category = Column(Enum(FailureCategory), nullable=True)
-    reason = Column(Text, nullable=True)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
+    diagnosis_id: Mapped[int] = mapped_column(
+        ForeignKey("diagnoses.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    reviewer_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    action: Mapped[ReviewAction] = mapped_column(Enum(ReviewAction), nullable=False)
+    corrected_category: Mapped[FailureCategory | None] = mapped_column(Enum(FailureCategory), nullable=True)
+    reason: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     diagnosis = relationship("Diagnosis", back_populates="reviews")

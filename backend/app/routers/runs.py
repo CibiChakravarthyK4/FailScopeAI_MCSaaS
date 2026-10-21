@@ -4,12 +4,15 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.dependencies import get_current_user, require_role
 from app.exceptions import AppException
+from app.models.audit_log import AuditLog
 from app.models.artifact import Artifact
+from app.models.diagnosis import Diagnosis
 from app.models.run import Run
 from app.models.test_case import TestCase
 from app.models.user import User, UserRole
-from app.schemas.run import EvidenceResponse, RunDetailResponse, RunResponse
-from app.services import run_service
+from app.schemas.diagnosis import HistoryEntryResponse
+from app.schemas.run import ArtifactResponse, EvidenceResponse, RunDetailResponse, RunResponse, TestCaseResponse
+from app.services import diagnosis_service, run_service
 
 router = APIRouter(prefix="/api/runs", tags=["runs"])
 
@@ -80,4 +83,60 @@ def get_evidence(
         .filter(Artifact.tenant_id == user.tenant_id, Artifact.test_case_id == test_case_id)
         .all()
     )
-    return EvidenceResponse(test_case=test_case, artifacts=artifacts)
+    diagnoses = (
+        db.query(Diagnosis)
+        .filter(Diagnosis.tenant_id == user.tenant_id, Diagnosis.test_case_id == test_case_id)
+        .order_by(Diagnosis.created_at.desc())
+        .all()
+    )
+    return EvidenceResponse(
+        test_case=TestCaseResponse.model_validate(test_case),
+        artifacts=[ArtifactResponse.model_validate(a) for a in artifacts],
+        diagnoses=[diagnosis_service.to_response(db, d) for d in diagnoses],
+    )
+
+
+@router.get("/{run_id}/tests/{test_case_id}/history", response_model=list[HistoryEntryResponse])
+def get_history(
+    run_id: int,
+    test_case_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    test_case = (
+        db.query(TestCase)
+        .filter(TestCase.tenant_id == user.tenant_id, TestCase.id == test_case_id, TestCase.run_id == run_id)
+        .first()
+    )
+    if not test_case:
+        raise HTTPException(status_code=404, detail="Test case not found")
+
+    diagnosis_ids = [
+        d.id
+        for d in db.query(Diagnosis.id)
+        .filter(Diagnosis.tenant_id == user.tenant_id, Diagnosis.test_case_id == test_case_id)
+        .all()
+    ]
+
+    entries = (
+        db.query(AuditLog, User.email)
+        .outerjoin(User, User.id == AuditLog.actor_id)
+        .filter(
+            AuditLog.tenant_id == user.tenant_id,
+            ((AuditLog.entity_type == "run") & (AuditLog.entity_id == run_id))
+            | ((AuditLog.entity_type == "diagnosis") & (AuditLog.entity_id.in_(diagnosis_ids))),
+        )
+        .order_by(AuditLog.created_at.asc())
+        .all()
+    )
+    return [
+        HistoryEntryResponse(
+            action=entry.action,
+            actor_email=actor_email,
+            entity_type=entry.entity_type,
+            entity_id=entry.entity_id,
+            metadata=entry.event_metadata,
+            created_at=entry.created_at,
+        )
+        for entry, actor_email in entries
+    ]

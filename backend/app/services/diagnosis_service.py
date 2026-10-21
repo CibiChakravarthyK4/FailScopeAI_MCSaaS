@@ -4,6 +4,7 @@ from app.exceptions import NotFoundError
 from app.models.artifact import Artifact, ArtifactType
 from app.models.diagnosis import Diagnosis, DiagnosisStatus, FailureCategory
 from app.models.test_case import TestCase
+from app.schemas.diagnosis import DiagnosisResponse
 from app.services import (
     ai_adapter,
     audit_service,
@@ -14,6 +15,23 @@ from app.services import (
 from app.storage.local_storage import read_artifact
 
 _MAX_LOG_CHARS = 4000
+
+
+def to_response(db: Session, diagnosis: Diagnosis) -> DiagnosisResponse:
+    test_case = db.query(TestCase).filter(TestCase.id == diagnosis.test_case_id).first()
+    return DiagnosisResponse(
+        id=diagnosis.id,
+        test_case_id=diagnosis.test_case_id,
+        run_id=test_case.run_id if test_case else 0,
+        category=diagnosis.category,
+        confidence_score=diagnosis.confidence_score,
+        evidence=diagnosis.evidence,
+        model_provider=diagnosis.model_provider,
+        model_name=diagnosis.model_name,
+        prompt_version=diagnosis.prompt_version,
+        status=diagnosis.status,
+        created_at=diagnosis.created_at,
+    )
 
 
 def run_investigation(db: Session, tenant_id: int, actor_id: int, test_case_id: int) -> Diagnosis:

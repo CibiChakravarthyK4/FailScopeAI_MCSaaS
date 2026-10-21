@@ -4,6 +4,8 @@ from app.models.defect_export import DefectExport, ExportStatus
 from app.models.diagnosis import Diagnosis, DiagnosisStatus, FailureCategory
 from app.models.failure_group import FailureGroup, FailureGroupMember
 from app.models.job import Job, JobStatus, JobType
+from app.models.owner_audit_log import OwnerAuditLog
+from app.models.platform_owner import PlatformOwner
 from app.models.refresh_token import RefreshToken
 from app.models.review import Review, ReviewAction
 from app.models.run import Run, RunStatus
@@ -26,6 +28,8 @@ __all__ = [
     "Job",
     "JobStatus",
     "JobType",
+    "OwnerAuditLog",
+    "PlatformOwner",
     "RefreshToken",
     "Review",
     "ReviewAction",

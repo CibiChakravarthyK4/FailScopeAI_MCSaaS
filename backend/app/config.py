@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    APP_NAME: str = "FailScope AI"
+    APP_NAME: str = "RootTrace Ivory"
     APP_ENV: Literal["development", "staging", "production", "demo"] = "development"
     DATABASE_URL: str
     REDIS_URL: str = "redis://localhost:6379/0"
@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     ALLOWED_ORIGINS: list[str] = ["http://localhost:5173"]
 
     OPENAI_API_KEY: str = ""
+    OPENAI_BASE_URL: str = ""
     OPENAI_MODEL: str = "gpt-4o-mini"
     MODEL_COST_CEILING_USD: float = 5.0
 
@@ -32,8 +33,6 @@ class Settings(BaseSettings):
     STRIPE_SECRET_KEY: str = ""
     STRIPE_PRICE_ID_PRO: str = ""
     STRIPE_WEBHOOK_SECRET: str = ""
-
-    PLATFORM_OWNER_EMAILS: str = ""
 
     class Config:
         env_file = ".env"

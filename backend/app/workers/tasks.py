@@ -40,6 +40,12 @@ def process_import_job(job_id: int) -> None:
         db.commit()
 
         payload = job.payload
+        if payload is None:
+            job.status = JobStatus.failed
+            job.error = {"message": "Job has no payload"}
+            db.commit()
+            return
+
         run = db.query(Run).filter(Run.id == payload["run_id"]).first()
         if not run:
             job.status = JobStatus.failed
@@ -121,9 +127,11 @@ def process_import_job(job_id: int) -> None:
         if job:
             if job.attempts >= job.max_attempts:
                 job.status = JobStatus.failed
-                run = db.query(Run).filter(Run.id == job.payload.get("run_id")).first()
-                if run:
-                    run.status = RunStatus.failed
+                run_id = job.payload.get("run_id") if job.payload else None
+                if run_id is not None:
+                    run = db.query(Run).filter(Run.id == run_id).first()
+                    if run:
+                        run.status = RunStatus.failed
             job.error = {"message": str(exc)}
             db.commit()
         raise

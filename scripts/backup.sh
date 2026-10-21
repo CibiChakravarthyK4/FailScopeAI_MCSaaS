@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# Backs up the FailScope AI database and uploaded artifacts.
+# Backs up the RootTrace Ivory database and uploaded artifacts.
+# NOTE: container/db/volume names below are the old "failscope" identifiers,
+# kept deliberately (CLAUDE.md Section 7) - renaming them is a planned,
+# separate task, not part of ordinary feature work.
 # Usage: scripts/backup.sh
 set -euo pipefail
 

@@ -17,6 +17,8 @@ router = APIRouter(prefix="/api/billing", tags=["billing"])
 @router.get("/status", response_model=BillingStatusResponse)
 def billing_status(db: Session = Depends(get_db), user: User = Depends(require_role(UserRole.admin))):
     tenant = db.query(Tenant).filter(Tenant.id == user.tenant_id).first()
+    if not tenant:
+        raise HTTPException(status_code=404, detail="Tenant not found")
     return BillingStatusResponse(configured=billing_service.billing_is_configured(), plan=tenant.plan)
 
 

@@ -9,11 +9,14 @@ from psycopg2 import errors as pg_errors
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 
-os.environ.setdefault("DATABASE_URL", "postgresql+psycopg2://failscope:failscope@localhost:5433/failscope_test")
+os.environ.setdefault("DATABASE_URL", "postgresql+psycopg2://failscope:failscope@127.0.0.1:5433/failscope_test")
 os.environ.setdefault("SECRET_KEY", "test-secret-key")
 os.environ.setdefault("STORAGE_ROOT", tempfile.mkdtemp(prefix="failscope-test-storage-"))
 
-MAINT_DSN = dict(dbname="failscope", user="failscope", password="failscope", host="localhost", port=5433)
+# 127.0.0.1, not "localhost": Docker Desktop's port forwarding for this port is
+# flaky over IPv6 (::1), which "localhost" sometimes resolves to first on this
+# machine, causing intermittent "server closed the connection unexpectedly".
+MAINT_DSN = dict(dbname="failscope", user="failscope", password="failscope", host="127.0.0.1", port=5433)
 
 
 def _ensure_test_database() -> None:
@@ -150,3 +153,14 @@ def tenant_a(client):
 def tenant_b(client):
     tokens = register_tenant(client, email="b@example.com", tenant_name="Tenant B")
     return tokens, auth_header(tokens)
+
+
+@pytest.fixture()
+def platform_owner(db):
+    """A Platform Owner row created the same way scripts/seed_platform_owner.py
+    does - there's no HTTP path that creates one, by design."""
+    from app.services import owner_auth_service
+
+    password = "owner-password-123"
+    owner, secret = owner_auth_service.create_owner(db, "owner@example.com", password)
+    return owner, secret, password

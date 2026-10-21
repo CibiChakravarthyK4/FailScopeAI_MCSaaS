@@ -14,8 +14,9 @@ from app.routers import (
     exports,
     failure_groups,
     jobs,
-    platform,
+    owner,
     runs,
+    search,
 )
 
 _is_production = settings.APP_ENV == "production"
@@ -53,7 +54,8 @@ app.include_router(audit_logs.router)
 app.include_router(dashboard.router)
 app.include_router(dashboard.usage_router)
 app.include_router(billing.router)
-app.include_router(platform.router)
+app.include_router(owner.router)
+app.include_router(search.router)
 
 
 @app.get("/health")

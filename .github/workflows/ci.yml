@@ -10,15 +10,26 @@ jobs:
   backend-test:
     runs-on: ubuntu-latest
     services:
+      # Ports (5433/6380) and the "failscope" maintenance db name match local dev
+      # (see CLAUDE.md Section 7) on purpose: tests/conftest.py hardcodes these
+      # same values, so CI runs the exact same test suite with no special-casing.
       postgres:
         image: postgres:15-alpine
         env:
           POSTGRES_USER: failscope
           POSTGRES_PASSWORD: failscope
-          POSTGRES_DB: failscope_test
-        ports: ["5432:5432"]
+          POSTGRES_DB: failscope
+        ports: ["5433:5432"]
         options: >-
           --health-cmd "pg_isready -U failscope"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ["6380:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 5
@@ -35,10 +46,16 @@ jobs:
         run: |
           cd backend
           ruff check app
-      - name: Test
-        env:
-          DATABASE_URL: postgresql://failscope:failscope@localhost:5432/failscope_test
-          SECRET_KEY: ci-test-secret
+      - name: Type check
+        run: |
+          cd backend
+          mypy app --ignore-missing-imports
+      - name: Dependency audit
+        run: |
+          cd backend
+          pip install pip-audit
+          pip-audit -r requirements.txt
+      - name: Test (includes Alembic migration up/down check)
         run: |
           cd backend
           pytest --cov=app --cov-fail-under=80
@@ -63,11 +80,37 @@ jobs:
         run: |
           cd frontend
           npm test -- --run
+      - name: Dependency audit
+        run: |
+          cd frontend
+          npm audit --audit-level=high
+      - name: UI design compliance (CLAUDE.md Section 4 and 10.5)
+        run: |
+          cd frontend/src
+          ! grep -rE "(linear|radial|conic)-gradient" . --include="*.tsx" --include="*.ts" --include="*.css"
+          ! grep -rEn '\b(red|green|amber|yellow|orange|purple)-[0-9]+\b' . --include="*.tsx" --include="*.ts"
+      - name: Branding check - no old product name (CLAUDE.md Section 10.5)
+        run: |
+          cd frontend/src
+          # theme/tokens.css is the one allowed exception: a comment explaining
+          # why the token prefix changed, not user-facing text.
+          ! grep -rn "FailScope\|ScopeRing\|Scope Ring" . --include="*.tsx" --include="*.ts" | grep -v "theme/tokens.css"
+          ! grep -rn --include="*.tsx" --include="*.ts" --include="*.css" -- "--fs-" . | grep -v "theme/tokens.css"
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan for committed secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     needs: [backend-test, frontend-test]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
       - run: docker compose build

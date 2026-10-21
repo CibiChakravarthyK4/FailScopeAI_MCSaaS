@@ -12,7 +12,14 @@ from alembic.config import Config
 from alembic import command
 
 MIGRATION_TEST_DB = "failscope_migration_test"
-MAINT_DSN = {"dbname": "failscope", "user": "failscope", "password": "failscope", "host": "localhost", "port": 5433}
+# 127.0.0.1, not "localhost" - see the comment next to conftest.py's MAINT_DSN.
+MAINT_DSN = {
+    "dbname": "failscope",
+    "user": "failscope",
+    "password": "failscope",
+    "host": "127.0.0.1",
+    "port": 5433,
+}
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 
 
@@ -29,7 +36,7 @@ def _recreate_database(name: str) -> None:
 
 def test_migrations_upgrade_and_downgrade_cleanly(monkeypatch):
     _recreate_database(MIGRATION_TEST_DB)
-    migration_url = f"postgresql+psycopg2://failscope:failscope@localhost:5433/{MIGRATION_TEST_DB}"
+    migration_url = f"postgresql+psycopg2://failscope:failscope@127.0.0.1:5433/{MIGRATION_TEST_DB}"
     monkeypatch.setattr("app.config.settings.DATABASE_URL", migration_url)
 
     alembic_cfg = Config(str(BACKEND_DIR / "alembic.ini"))
@@ -38,7 +45,7 @@ def test_migrations_upgrade_and_downgrade_cleanly(monkeypatch):
     command.upgrade(alembic_cfg, "head")
 
     conn = psycopg2.connect(
-        dbname=MIGRATION_TEST_DB, user="failscope", password="failscope", host="localhost", port=5433
+        dbname=MIGRATION_TEST_DB, user="failscope", password="failscope", host="127.0.0.1", port=5433
     )
     try:
         with conn.cursor() as cur:
@@ -54,7 +61,7 @@ def test_migrations_upgrade_and_downgrade_cleanly(monkeypatch):
     command.downgrade(alembic_cfg, "base")
 
     conn = psycopg2.connect(
-        dbname=MIGRATION_TEST_DB, user="failscope", password="failscope", host="localhost", port=5433
+        dbname=MIGRATION_TEST_DB, user="failscope", password="failscope", host="127.0.0.1", port=5433
     )
     try:
         with conn.cursor() as cur:
