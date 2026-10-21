@@ -114,3 +114,45 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker compose build
+
+  e2e-test:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Start the Docker Compose stack (with the AI stub overlay)
+        run: docker compose -f docker-compose.yml -f docker-compose.e2e.yml up -d --build
+      - name: Wait for the backend and frontend to be reachable
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:8010/health > /dev/null && curl -sf http://localhost:8081/ > /dev/null; then
+              echo "Stack is up"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Stack did not become ready in time"
+          docker compose -f docker-compose.yml -f docker-compose.e2e.yml logs
+          exit 1
+      - name: Install Playwright
+        run: |
+          cd e2e
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Run E2E suite
+        run: |
+          cd e2e
+          npx playwright test
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: e2e/test-results/
+          retention-days: 7
+      - name: Tear down the stack
+        if: always()
+        run: docker compose -f docker-compose.yml -f docker-compose.e2e.yml down -v
