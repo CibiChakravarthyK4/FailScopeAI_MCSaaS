@@ -1,6 +1,6 @@
 import path from 'path';
 import { test, expect } from '@playwright/test';
-import { loadState, uiLogin } from './helpers';
+import { FIXTURES_DIR, loadState, uiLogin } from './helpers';
 
 // Journey 2: "Import a failed run (JUnit XML + logs + screenshot) -> job completes."
 // Import is synchronous (creates the Run/Job rows); processing the JUnit file
@@ -13,8 +13,8 @@ test('imports a run with a log attachment and the job completes', async ({ page 
   const externalRunId = `e2e-import-${Date.now()}`;
   await page.goto('/runs/new');
   await page.getByLabel('Run ID').fill(externalRunId);
-  await page.locator('input[type="file"]').first().setInputFiles(path.join(__dirname, 'fixtures', 'sample-run.xml'));
-  await page.locator('input[type="file"]').nth(1).setInputFiles(path.join(__dirname, 'fixtures', 'test_checkout_flow.txt'));
+  await page.locator('input[type="file"]').first().setInputFiles(path.join(FIXTURES_DIR, 'sample-run.xml'));
+  await page.locator('input[type="file"]').nth(1).setInputFiles(path.join(FIXTURES_DIR, 'test_checkout_flow.txt'));
   await page.getByRole('button', { name: 'Import' }).click();
 
   await page.waitForURL(/\/runs\/\d+$/);

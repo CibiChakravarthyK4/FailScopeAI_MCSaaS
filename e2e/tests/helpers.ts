@@ -1,8 +1,14 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import type { APIRequestContext, Page } from '@playwright/test';
 
 export const API_URL = process.env.E2E_API_URL ?? 'http://localhost:8010';
+
+// e2e/package.json sets "type": "module", so these files run as ESM at
+// runtime (no __dirname) even though tsconfig.json tells tsc to type-check
+// them as CommonJS - the two don't have to agree.
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const STATE_PATH = path.join(__dirname, '..', '.auth', 'state.json');
 
@@ -21,12 +27,24 @@ export function saveState(state: SharedState): void {
   fs.writeFileSync(STATE_PATH, JSON.stringify(state, null, 2));
 }
 
+// /auth/login is rate-limited to 10/5min per IP (app/rate_limit.py), and every
+// spec file in this suite shares one IP. apiLogin is used purely for test
+// setup (importing a run, etc.), not to test the login endpoint itself - that
+// job belongs to uiLogin, which always hits the real endpoint - so repeat
+// calls for the same tenant reuse one cached token instead of spending more
+// of the suite's login budget.
+const tokenCache = new Map<string, string>();
+
 export async function apiLogin(request: APIRequestContext, email: string, password: string): Promise<string> {
+  const cached = tokenCache.get(email);
+  if (cached) return cached;
+
   const resp = await request.post(`${API_URL}/auth/login`, { data: { email, password } });
   if (!resp.ok()) {
     throw new Error(`Login failed for ${email}: ${resp.status()} ${await resp.text()}`);
   }
   const body = await resp.json();
+  tokenCache.set(email, body.access_token);
   return body.access_token;
 }
 
@@ -38,7 +56,7 @@ export async function uiLogin(page: Page, email: string, password: string): Prom
   await page.waitForURL('**/dashboard');
 }
 
-const FIXTURES_DIR = path.join(__dirname, 'fixtures');
+export const FIXTURES_DIR = path.join(__dirname, 'fixtures');
 const SAMPLE_JUNIT_XML = fs.readFileSync(path.join(FIXTURES_DIR, 'sample-run.xml'));
 const SAMPLE_LOG = fs.readFileSync(path.join(FIXTURES_DIR, 'test_checkout_flow.txt'));
 

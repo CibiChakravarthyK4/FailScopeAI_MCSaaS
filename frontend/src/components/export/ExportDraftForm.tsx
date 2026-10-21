@@ -55,8 +55,11 @@ export function ExportDraftForm({ testCaseId }: { testCaseId: number | null }) {
         <form onSubmit={handleCreateDraft} className="space-y-4">
           <Input label="Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
           <div>
-            <label className="mb-1 block text-sm font-medium text-ink">Steps</label>
+            <label htmlFor="export-steps" className="mb-1 block text-sm font-medium text-ink">
+              Steps
+            </label>
             <textarea
+              id="export-steps"
               className="w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-brand-blue"
               rows={4}
               value={steps}

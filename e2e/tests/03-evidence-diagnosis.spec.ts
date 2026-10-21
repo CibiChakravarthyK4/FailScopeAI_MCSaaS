@@ -30,6 +30,9 @@ test('views evidence for a failed test case and runs an AI diagnosis with citati
   await page.getByRole('button', { name: 'Diagnosis' }).click();
   await page.getByRole('button', { name: 'Investigate with AI' }).click();
 
-  await expect(page.getByText('Application bug')).toBeVisible();
+  // A plain string match is case-insensitive and also matches the reviewer
+  // form's lowercase "application bug" <option>; an exact-case regex (no `i`
+  // flag) disambiguates from the TaxonomyChip's "Application bug" label.
+  await expect(page.getByText(/^Application bug$/)).toBeVisible();
   await expect(page.getByText('Stub AI response for E2E testing')).toBeVisible();
 });

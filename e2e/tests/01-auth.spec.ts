@@ -25,7 +25,10 @@ test.describe('Sign in', () => {
     await uiLogin(page, tenantA.email, tenantA.password);
 
     await expect(page.getByRole('heading', { name: /Welcome,/ })).toBeVisible();
-    await expect(page.getByText(tenantA.email)).toBeVisible();
+    // The dashboard heading also contains the email (no full_name set for
+    // this tenant), so scope to the navbar specifically to avoid an
+    // ambiguous match between the two.
+    await expect(page.locator('header').getByText(tenantA.email)).toBeVisible();
   });
 
   test('rejects an invalid password', async ({ page }) => {
