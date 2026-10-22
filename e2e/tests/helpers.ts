@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { authenticator } from 'otplib';
 import type { APIRequestContext, Page } from '@playwright/test';
 
 export const API_URL = process.env.E2E_API_URL ?? 'http://localhost:8010';
@@ -16,6 +17,7 @@ export interface SharedState {
   tenantA: { email: string; password: string; tenantName: string };
   tenantB: { email: string; password: string; tenantName: string };
   viewer: { email: string; password: string };
+  owner: { email: string; password: string; totpSecret: string };
 }
 
 export function loadState(): SharedState {
@@ -45,6 +47,22 @@ export async function apiLogin(request: APIRequestContext, email: string, passwo
   }
   const body = await resp.json();
   tokenCache.set(email, body.access_token);
+  return body.access_token;
+}
+
+export async function ownerApiLogin(
+  request: APIRequestContext,
+  email: string,
+  password: string,
+  totpSecret: string
+): Promise<string> {
+  const resp = await request.post(`${API_URL}/api/owner/auth/login`, {
+    data: { email, password, totp_code: authenticator.generate(totpSecret) },
+  });
+  if (!resp.ok()) {
+    throw new Error(`Owner login failed for ${email}: ${resp.status()} ${await resp.text()}`);
+  }
+  const body = await resp.json();
   return body.access_token;
 }
 

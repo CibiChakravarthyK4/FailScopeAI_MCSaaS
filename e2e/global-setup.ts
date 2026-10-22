@@ -13,7 +13,7 @@ const PASSWORD = 'e2e-test-password-1!';
 
 async function register(api: APIRequestContext, email: string, tenantName: string): Promise<void> {
   const resp = await api.post(`${API_URL}/auth/register`, {
-    data: { email, password: PASSWORD, tenant_name: tenantName },
+    data: { email, password: PASSWORD, tenant_name: tenantName, accepted_terms: true },
   });
   if (!resp.ok()) {
     throw new Error(`Setup registration failed for ${email}: ${resp.status()} ${await resp.text()}`);
@@ -26,6 +26,11 @@ export default async function globalSetup(): Promise<void> {
   const tenantA = { email: `e2e-a-${RUN_ID}@example.com`, password: PASSWORD, tenantName: `E2E Tenant A ${RUN_ID}` };
   const tenantB = { email: `e2e-b-${RUN_ID}@example.com`, password: PASSWORD, tenantName: `E2E Tenant B ${RUN_ID}` };
   const viewer = { email: `e2e-viewer-${RUN_ID}@example.com`, password: PASSWORD };
+  const owner = {
+    email: `e2e-owner-${RUN_ID}@example.com`,
+    password: PASSWORD,
+    totpSecret: 'JBSWY3DPEHPK3PXP',
+  };
 
   await register(api, tenantA.email, tenantA.tenantName);
   await register(api, tenantB.email, tenantB.tenantName);
@@ -51,9 +56,20 @@ export default async function globalSetup(): Promise<void> {
        VALUES ($1, $2, $3, 'viewer', true, now(), now())`,
       [tenantAId, viewer.email, hashed]
     );
+
+    // No HTTP endpoint creates a Platform Owner either (by design - see
+    // app/models/platform_owner.py) - seeded directly, same as the viewer
+    // above. The TOTP secret is a fixed base32 string; it only needs to be
+    // valid, not secret, for a throwaway test account.
+    const ownerPasswordHash = bcrypt.hashSync(owner.password, 10);
+    await pg.query(
+      `INSERT INTO platform_owners (email, hashed_password, totp_secret, is_active, created_at, updated_at)
+       VALUES ($1, $2, $3, true, now(), now())`,
+      [owner.email, ownerPasswordHash, owner.totpSecret]
+    );
   } finally {
     await pg.end();
   }
 
-  saveState({ tenantA, tenantB, viewer } satisfies SharedState);
+  saveState({ tenantA, tenantB, viewer, owner } satisfies SharedState);
 }

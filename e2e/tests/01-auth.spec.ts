@@ -14,6 +14,7 @@ test.describe('Sign in', () => {
     await page.getByLabel('Workspace name').fill('E2E Register Workspace');
     await page.getByLabel('Email').fill(email);
     await page.getByLabel('Password').fill('e2e-test-password-1!');
+    await page.getByLabel(/I agree to the/).check();
     await page.getByRole('button', { name: 'Create account' }).click();
 
     await page.waitForURL('**/dashboard');
