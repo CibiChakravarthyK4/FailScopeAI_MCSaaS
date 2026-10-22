@@ -118,11 +118,18 @@ roottrace-ivory/
 │   ├── alembic/            # Database migration scripts
 │   ├── app/
 │   │   ├── api/            # FastAPI routers (v1 endpoints)
-│   │   │   └── owner/      # Platform Owner endpoints (clients, billing report)
+│   │   │   └── owner/      # Platform Owner endpoints (clients, billing report, career applications)
 │   │   ├── core/           # Configuration, security, database session
+│   │   ├── content/        # Static data the app reads at runtime (careers_roles.json)
 │   │   ├── models/         # Tenant-scoped SQLAlchemy ORM models (+ plans, billing records)
-│   │   ├── schemas/        # Pydantic request/response models
+│   │   │                   # plus the non-tenant-scoped public-form tables (contact_messages,
+│   │   │                   # demo_requests, career_applications, help_article_feedback) and
+│   │   │                   # legal_acceptances (Section 17.4)
+│   │   ├── schemas/        # Pydantic request/response models (+ schemas/public.py)
 │   │   ├── services/       # Core business logic (Parser, LLM adapter, Jira exporter, billing)
+│   │   │                   # plus public-site services (contact/demo/careers/help-feedback,
+│   │   │                   # public_submission_service, mail_service, legal_acceptance_service)
+│   │   ├── storage/        # Local artifact and public-upload storage (Section 17.6)
 │   │   └── utils/          # Credential redaction, hashing, artifact scanners
 │   ├── tests/              # Backend unit and integration tests
 │   ├── Dockerfile
@@ -131,9 +138,15 @@ roottrace-ivory/
 │   ├── src/
 │   │   ├── assets/         # Static assets and icons
 │   │   ├── components/     # Reusable UI components
+│   │   │   └── marketing/  # Public site shell (Container, MarketingHeader/Footer,
+│   │   │                   # PublicPageHeader, LegalLayout) - Section 17.2
+│   │   ├── config/         # company.ts (Section 17.3), pricing.ts - single source of truth
+│   │   │                   # for facts shown on the public site, no invented values
+│   │   ├── content/
+│   │   │   └── help/       # Help Center articles (Markdown with front matter)
 │   │   ├── layouts/        # Dashboard layout shells
 │   │   ├── pages/          # Application view screens
-│   │   │   └── owner/      # Platform Owner dashboard and billing report pages
+│   │   │   └── owner/      # Platform Owner dashboard, billing report and career application pages
 │   │   ├── services/       # API client bindings (Axios)
 │   │   └── theme/          # Blue & White color tokens (--iv-*) & global styles
 │   ├── package.json
@@ -423,3 +436,47 @@ Everything beyond option A needs the tenant Admin's consent and a documented cha
   - Change a tenant's access only through **verified server-side payment events** (signed webhooks). Handle duplicate and delayed webhooks idempotently.
   - Billing data shown to the `Platform Owner` is read from the same records the provider updates.
 - Related tests: Section 10.7.
+
+---
+
+## 17. Public and Legal Pages
+
+RootTrace Ivory's public site (everything reachable without signing in) follows the same brand and design rules as the rest of the product (Section 4), plus the rules below.
+
+### 17.1 Routes (Phase 1 built; later phases add more)
+`/` (landing), `/company`, `/careers`, `/contact`, `/privacy`, `/terms`, `/pricing`, `/security`, `/demo`, `/help` (and `/help/<slug>`). Phase 2/3 routes (`/faq`, `/integrations`, `/tour`, `/subprocessors`, `/cookies`, `/acceptable-use`, `/changelog`, `/blog`, `/accessibility`, `/dpa`) are added to the header/footer only once each page actually exists - a nav entry must never link to a route that isn't built yet.
+
+### 17.2 Shared public layout
+- Every public page renders inside `MarketingHeader` + `MarketingFooter` (`frontend/src/components/marketing/`), with all content inside the shared `<Container>` (1200px). No section may set its own max-width.
+- Every page: `<PublicPageHeader>` (small label, one `<h1>`, one-line subtitle) or, for the two legal pages, `<LegalLayout>` (760px reading column, sticky table of contents from 1024px up, version/effective-date line, "Draft for legal review" banner).
+- Every page calls the `useSeo(title, description, path)` hook (hand-rolled, not a dependency) to set `<title>`, meta description, canonical URL and `og:*` tags. Checked automatically by `frontend/src/pages/publicPageLayout.test.ts`, which also asserts every public page uses both `MarketingHeader` and `MarketingFooter`.
+
+### 17.3 Company facts: one config file, no invented facts
+- `frontend/src/config/company.ts` is the single source for every company fact shown on a page: legal name, addresses, emails, phone, Grievance Officer, legal document versions/effective dates. Every value starts as an explicit `[placeholder]` string - replace them before launch, never invent a real-looking value (no address, phone number, team member, customer, logo, award, statistic, certification or testimonial that isn't true and confirmed).
+- The backend cannot import a frontend `.ts` file, so it has its own small set of settings for anything it needs at runtime: notification recipient addresses (`SUPPORT_EMAIL`, `SALES_EMAIL`, `HIRING_EMAIL` in `app/config.py`) and the authoritative legal document versions (`PRIVACY_POLICY_VERSION`, `TERMS_VERSION` - see 17.4). These must be kept in sync by hand with `company.ts`'s display copy of the same values.
+- The word "AI" does not appear in headlines or marketing copy anywhere on the public site. The legal and security pages may say "automated analysis, including third-party language models" - that disclosure matters more than the house style rule.
+
+### 17.4 Legal document versioning and acceptance (C05)
+- The backend is the source of truth for "what version is current" (`PRIVACY_POLICY_VERSION` / `TERMS_VERSION` in `app/config.py`), not the frontend - this is what gets recorded against a user's acceptance, so it can't be client-supplied.
+- `legal_acceptances` (`app/models/legal_acceptance.py`) stores one row per `(user, document, version)`, never updated in place, so "who accepted what, when" stays a complete history.
+- Registration requires a checked "I agree to the Terms and Conditions and Privacy Policy" box (`accepted_terms`, validated server-side too) and records acceptance of both documents. `GET /auth/me` reports `needs_legal_acceptance`; any signed-in user who owes acceptance (most often a Google OAuth sign-in, which has no form step, or an existing user after a version bump) is redirected to `/accept-terms` by `ProtectedRoute` before they can reach any other page. `POST /auth/accept-legal` records it and writes an audit log entry.
+- Bumping a document's version (because the wording changed materially) automatically makes every existing user owe re-acceptance on their next request - no separate "ask again" flag needed.
+
+### 17.5 Public form protections
+Every anonymous public form (Contact, Request a Demo, Join our Team) shares the same protections, in `app/services/public_submission_service.py` plus each form's own service:
+- **Honeypot**: a field real users never see (hidden off-screen, not `type="hidden"`, so JS-driven bots that fill every visible-ish field still get caught) - a filled honeypot returns success but silently drops the submission, giving a bot no signal to retry a different way.
+- **Rate limiting**: `rate_limit_by_ip`, same mechanism as auth endpoints, tuned per form (5/hour for Contact/Demo/Careers, 20/hour for the much lower-stakes help-article feedback).
+- **No raw IP or message content in logs**: only a one-way hash of the IP is stored (`public_submission_service.hash_ip`); the only place message content goes is the notification email itself (the intended recipient), never a log line.
+- **CAPTCHA hook**: `public_submission_service.verify_captcha()` exists and is called nowhere yet meaningfully - it always passes while `CAPTCHA_ENABLED` (default `False`) is off, and fails closed if turned on before a real provider replaces it. Wire a real provider in before relying on this.
+- **Notification email**: `app/services/mail_service.py` is dev-mode only (console or file backend) - no real SMTP/provider is integrated yet (consistent with Section 16's "no third-party payment/notification services pre-release").
+- These tables (`contact_messages`, `demo_requests`, `career_applications`, `help_article_feedback`) are explicitly **not** tenant-scoped - there is no tenant_id to scope by, since the submitter has no account yet.
+
+### 17.6 File uploads from the public internet (resumes)
+- Validated by **extension AND magic bytes** (`app/services/careers_service.py`) - an extension check alone is spoofable (rename `evil.exe` to `evil.pdf`), so the first few bytes of the file must also match (`%PDF` for PDF, the zip local-file-header signature for `.docx`).
+- Stored under `PUBLIC_UPLOAD_ROOT`, outside any tenant's storage path, renamed to a random id (`uuid4().hex`) - never the original filename or a content checksum, so nothing about the stored path is guessable or leaks the original name.
+- The original filename is stripped to its basename (`Path(filename).name`) before being stored anywhere, even just for display - this is what neutralizes path traversal in an uploaded filename.
+- A virus-scan hook (`careers_service.scan_for_viruses`) exists and is called on every upload; it has no real provider wired up yet and always reports clean. Wire a real scanner in before accepting uploads at any meaningful scale.
+- Never exposed publicly: only the Platform Owner can list, view or download career applications (`/api/owner/careers/*`), and every view or download writes an audit log entry (C05), same pattern as the existing owner billing/usage endpoints.
+
+### 17.7 What still needs a human before launch
+Every `[placeholder]` in `company.ts`, every `[LEGAL REVIEW]`-tagged assumption in `PrivacyPolicyPage.tsx`/`TermsPage.tsx` (retention periods, international-transfer specifics, liability cap, jurisdiction city), real plan pricing (`frontend/src/config/pricing.ts` - currently "Contact us for pricing" everywhere, by design), and a real Open Graph share image (`/og-image.png` doesn't exist - this tooling can't generate a raster image).
