@@ -17,6 +17,12 @@ const PUBLIC_PAGES: { path: string; heading: RegExp }[] = [
   { path: '/demo', heading: /See RootTrace Ivory with your own failures/ },
   { path: '/help', heading: /Find your way around/ },
   { path: '/careers', heading: /Help us build a product/ },
+  { path: '/faq', heading: /Questions, answered plainly/ },
+  { path: '/integrations', heading: /Connect RootTrace Ivory/ },
+  { path: '/tour', heading: /From a failed test to a confirmed defect/ },
+  { path: '/subprocessors', heading: /Who we share data with/ },
+  { path: '/cookies', heading: /We don't use cookies today/ },
+  { path: '/acceptable-use', heading: /Using RootTrace Ivory responsibly/ },
 ];
 
 test.describe('Public site pages', () => {
@@ -102,5 +108,23 @@ test.describe('Public site pages', () => {
     expect(listResp.ok()).toBeTruthy();
     const applications = await listResp.json();
     expect(applications.some((a: { email: string }) => a.email === applicantEmail)).toBe(true);
+  });
+
+  test('FAQ accordion opens and closes with a click and the keyboard', async ({ page }) => {
+    await page.goto('/faq');
+    const question = page.getByText('Where is my data stored?');
+    await question.click();
+    await expect(page.getByText(/hosting location is still being finalized/i)).toBeVisible();
+
+    await question.focus();
+    await page.keyboard.press('Enter');
+    await expect(page.getByText(/hosting location is still being finalized/i)).not.toBeVisible();
+  });
+
+  test('an unknown route shows the friendly 404 page', async ({ page }) => {
+    await page.goto('/this-route-does-not-exist');
+    await expect(page.getByRole('heading', { name: "We can't find that page." })).toBeVisible();
+    await page.getByRole('link', { name: 'Back home' }).click();
+    await expect(page).toHaveURL('/');
   });
 });
