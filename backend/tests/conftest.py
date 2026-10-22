@@ -138,7 +138,13 @@ def _mock_job_queue(monkeypatch, db):
 def register_tenant(client, email="qa@example.com", tenant_name="Acme QA", password="password123"):
     resp = client.post(
         "/auth/register",
-        json={"email": email, "password": password, "full_name": "QA Lead", "tenant_name": tenant_name},
+        json={
+            "email": email,
+            "password": password,
+            "full_name": "QA Lead",
+            "tenant_name": tenant_name,
+            "accepted_terms": True,
+        },
     )
     assert resp.status_code == 201, resp.text
     return resp.json()

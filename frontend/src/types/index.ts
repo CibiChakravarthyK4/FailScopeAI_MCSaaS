@@ -8,6 +8,7 @@ export interface User {
   role: UserRole;
   is_active: boolean;
   tenant_name: string;
+  needs_legal_acceptance: boolean;
 }
 
 export interface TokenResponse {

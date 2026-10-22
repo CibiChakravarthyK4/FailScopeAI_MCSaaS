@@ -15,7 +15,7 @@ from app.exceptions import ConflictError, ValidationFailedError
 from app.models.refresh_token import RefreshToken
 from app.models.tenant import Tenant
 from app.models.user import User, UserRole
-from app.services import audit_service
+from app.services import audit_service, legal_acceptance_service
 
 
 def _slugify(name: str) -> str:
@@ -33,7 +33,12 @@ def _unique_slug(db: Session, name: str) -> str:
     return slug
 
 
-def register(db: Session, email: str, password: str, full_name: str | None, tenant_name: str) -> User:
+def register(
+    db: Session, email: str, password: str, full_name: str | None, tenant_name: str, accepted_terms: bool
+) -> User:
+    if not accepted_terms:
+        raise ValidationFailedError("You must accept the Terms and Conditions and Privacy Policy")
+
     tenant = Tenant(name=tenant_name, slug=_unique_slug(db, tenant_name), plan="pilot")
     db.add(tenant)
     db.flush()
@@ -50,7 +55,9 @@ def register(db: Session, email: str, password: str, full_name: str | None, tena
     )
     db.add(user)
     db.flush()
+    legal_acceptance_service.record_acceptance_of_both(db, user)
     audit_service.record(db, tenant.id, user.id, "register", "user", user.id)
+    audit_service.record(db, tenant.id, user.id, "legal_accepted", "user", user.id)
     db.commit()
     return user
 

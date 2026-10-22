@@ -15,12 +15,22 @@ def test_register_rate_limited_after_threshold(client):
     for i in range(5):
         client.post(
             "/auth/register",
-            json={"email": f"spam{i}@example.com", "password": "password123", "tenant_name": f"Spam {i}"},
+            json={
+                "email": f"spam{i}@example.com",
+                "password": "password123",
+                "tenant_name": f"Spam {i}",
+                "accepted_terms": True,
+            },
         )
 
     blocked = client.post(
         "/auth/register",
-        json={"email": "spam-blocked@example.com", "password": "password123", "tenant_name": "Blocked"},
+        json={
+            "email": "spam-blocked@example.com",
+            "password": "password123",
+            "tenant_name": "Blocked",
+            "accepted_terms": True,
+        },
     )
     assert blocked.status_code == 429
 

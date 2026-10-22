@@ -5,6 +5,7 @@ from app.models.defect_export import DefectExport, ExportStatus
 from app.models.diagnosis import Diagnosis, DiagnosisStatus, FailureCategory
 from app.models.failure_group import FailureGroup, FailureGroupMember
 from app.models.job import Job, JobStatus, JobType
+from app.models.legal_acceptance import LegalAcceptance, LegalDocument
 from app.models.owner_audit_log import OwnerAuditLog
 from app.models.platform_owner import PlatformOwner
 from app.models.refresh_token import RefreshToken
@@ -32,6 +33,8 @@ __all__ = [
     "Job",
     "JobStatus",
     "JobType",
+    "LegalAcceptance",
+    "LegalDocument",
     "OwnerAuditLog",
     "PlatformOwner",
     "RefreshToken",

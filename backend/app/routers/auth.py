@@ -20,7 +20,7 @@ from app.schemas.auth import (
     TokenResponse,
     UserResponse,
 )
-from app.services import auth_service
+from app.services import audit_service, auth_service, legal_acceptance_service
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -33,7 +33,9 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 )
 def register(req: RegisterRequest, db: Session = Depends(get_db)):
     try:
-        user = auth_service.register(db, req.email, req.password, req.full_name, req.tenant_name)
+        user = auth_service.register(
+            db, req.email, req.password, req.full_name, req.tenant_name, req.accepted_terms
+        )
     except AppException as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
     access, refresh = auth_service.issue_tokens(db, user)
@@ -71,7 +73,7 @@ def logout(req: LogoutRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/me", response_model=UserResponse)
-def me(user=Depends(get_current_user)):
+def me(user=Depends(get_current_user), db: Session = Depends(get_db)):
     return UserResponse(
         id=user.id,
         tenant_id=user.tenant_id,
@@ -80,7 +82,15 @@ def me(user=Depends(get_current_user)):
         role=user.role,
         is_active=user.is_active,
         tenant_name=user.tenant.name,
+        needs_legal_acceptance=legal_acceptance_service.needs_acceptance(db, user),
     )
+
+
+@router.post("/accept-legal", status_code=204)
+def accept_legal(user=Depends(get_current_user), db: Session = Depends(get_db)):
+    legal_acceptance_service.record_acceptance_of_both(db, user)
+    audit_service.record(db, user.tenant_id, user.id, "legal_accepted", "user", user.id)
+    db.commit()
 
 
 @router.get("/google/login")

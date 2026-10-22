@@ -48,6 +48,13 @@ class Settings(BaseSettings):
     PUBLIC_UPLOAD_ROOT: str = "./storage/public"
     MAX_RESUME_SIZE_MB: int = 5
 
+    # Legal document versioning (C05): the backend is the single source of
+    # truth for "which version is current" - frontend/src/config/company.ts
+    # mirrors these same strings for display only (the page text/effective
+    # date), and must be kept in sync by hand when either changes.
+    PRIVACY_POLICY_VERSION: str = "0.1-draft"
+    TERMS_VERSION: str = "0.1-draft"
+
     class Config:
         env_file = ".env"
 

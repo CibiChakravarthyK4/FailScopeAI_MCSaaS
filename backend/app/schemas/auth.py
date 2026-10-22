@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
 class RegisterRequest(BaseModel):
@@ -6,6 +6,14 @@ class RegisterRequest(BaseModel):
     password: str = Field(min_length=8, max_length=72)
     full_name: str | None = None
     tenant_name: str
+    accepted_terms: bool
+
+    @field_validator('accepted_terms')
+    @classmethod
+    def accepted_terms_required(cls, v: bool) -> bool:
+        if not v:
+            raise ValueError('You must accept the Terms and Conditions and Privacy Policy')
+        return v
 
 
 class LoginRequest(BaseModel):
@@ -35,6 +43,7 @@ class UserResponse(BaseModel):
     role: str
     is_active: bool
     tenant_name: str
+    needs_legal_acceptance: bool
 
     class Config:
         from_attributes = True

@@ -25,6 +25,7 @@ const fakeUser = {
   role: 'admin' as const,
   is_active: true,
   tenant_name: 'Acme',
+  needs_legal_acceptance: false,
 };
 
 beforeEach(() => {

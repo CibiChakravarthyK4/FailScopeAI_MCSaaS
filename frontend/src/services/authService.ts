@@ -10,6 +10,7 @@ export async function register(
   email: string,
   password: string,
   tenantName: string,
+  acceptedTerms: boolean,
   fullName?: string
 ): Promise<TokenResponse> {
   const { data } = await api.post<TokenResponse>('/auth/register', {
@@ -17,8 +18,13 @@ export async function register(
     password,
     tenant_name: tenantName,
     full_name: fullName,
+    accepted_terms: acceptedTerms,
   });
   return data;
+}
+
+export async function acceptLegal(): Promise<void> {
+  await api.post('/auth/accept-legal');
 }
 
 export async function me(): Promise<User> {

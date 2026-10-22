@@ -6,9 +6,16 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, tenantName: string, fullName?: string) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    tenantName: string,
+    acceptedTerms: boolean,
+    fullName?: string
+  ) => Promise<void>;
   setTokens: (accessToken: string, refreshToken: string) => Promise<void>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,9 +48,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await applyTokens(tokens.access_token, tokens.refresh_token);
   };
 
-  const register = async (email: string, password: string, tenantName: string, fullName?: string) => {
-    const tokens = await authService.register(email, password, tenantName, fullName);
+  const register = async (
+    email: string,
+    password: string,
+    tenantName: string,
+    acceptedTerms: boolean,
+    fullName?: string
+  ) => {
+    const tokens = await authService.register(email, password, tenantName, acceptedTerms, fullName);
     await applyTokens(tokens.access_token, tokens.refresh_token);
+  };
+
+  const refreshUser = async () => {
+    setUser(await authService.me());
   };
 
   const logout = async () => {
@@ -58,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, setTokens: applyTokens, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, register, setTokens: applyTokens, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

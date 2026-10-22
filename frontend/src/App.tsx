@@ -23,6 +23,9 @@ import { CompanyPage } from './pages/CompanyPage';
 import { ContactPage } from './pages/ContactPage';
 import { PricingPage } from './pages/PricingPage';
 import { SecurityPage } from './pages/SecurityPage';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { TermsPage } from './pages/TermsPage';
+import { AcceptTermsPage } from './pages/AcceptTermsPage';
 import { OwnerLoginPage } from './pages/owner/OwnerLoginPage';
 import { OwnerDashboardPage } from './pages/owner/OwnerDashboardPage';
 
@@ -140,6 +143,9 @@ export default function App() {
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/security" element={<SecurityPage />} />
+            <Route path="/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/accept-terms" element={<AcceptTermsPage />} />
           </Routes>
         </BrowserRouter>
       </OwnerAuthProvider>

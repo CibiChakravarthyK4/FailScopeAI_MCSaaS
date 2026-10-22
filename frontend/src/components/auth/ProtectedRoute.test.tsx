@@ -15,12 +15,14 @@ describe('ProtectedRoute', () => {
         role: 'admin',
         is_active: true,
         tenant_name: 'Acme',
+        needs_legal_acceptance: false,
       },
       isLoading: false,
       login: vi.fn(),
       register: vi.fn(),
       setTokens: vi.fn(),
       logout: vi.fn(),
+      refreshUser: vi.fn(),
     });
 
     render(
@@ -42,6 +44,46 @@ describe('ProtectedRoute', () => {
     expect(screen.getByText('secret content')).toBeInTheDocument();
   });
 
+  it('redirects to /accept-terms when the user has not accepted the current legal documents', () => {
+    vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({
+      user: {
+        id: 1,
+        tenant_id: 1,
+        email: 'a@example.com',
+        full_name: null,
+        role: 'admin',
+        is_active: true,
+        tenant_name: 'Acme',
+        needs_legal_acceptance: true,
+      },
+      isLoading: false,
+      login: vi.fn(),
+      register: vi.fn(),
+      setTokens: vi.fn(),
+      logout: vi.fn(),
+      refreshUser: vi.fn(),
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/protected']}>
+        <Routes>
+          <Route
+            path="/protected"
+            element={
+              <ProtectedRoute>
+                <div>secret content</div>
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/accept-terms" element={<div>accept terms page</div>} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('accept terms page')).toBeInTheDocument();
+    expect(screen.queryByText('secret content')).not.toBeInTheDocument();
+  });
+
   it('redirects to /login when there is no user', () => {
     vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({
       user: null,
@@ -50,6 +92,7 @@ describe('ProtectedRoute', () => {
       register: vi.fn(),
       setTokens: vi.fn(),
       logout: vi.fn(),
+      refreshUser: vi.fn(),
     });
 
     render(
@@ -80,6 +123,7 @@ describe('ProtectedRoute', () => {
       register: vi.fn(),
       setTokens: vi.fn(),
       logout: vi.fn(),
+      refreshUser: vi.fn(),
     });
 
     render(

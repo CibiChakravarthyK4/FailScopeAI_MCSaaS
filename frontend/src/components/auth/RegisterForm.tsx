@@ -1,7 +1,8 @@
 import { useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Input } from '../ui/Input';
+import { Checkbox } from '../ui/Checkbox';
 import { Button } from '../ui/Button';
 import { FormMessage } from '../ui/FormMessage';
 import { GoogleSignInButton } from './GoogleSignInButton';
@@ -13,15 +14,22 @@ export function RegisterForm() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [termsError, setTermsError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+    setTermsError(null);
+    if (!acceptedTerms) {
+      setTermsError('You must accept the Terms and Conditions and Privacy Policy to continue.');
+      return;
+    }
     setIsLoading(true);
     try {
-      await register(email, password, tenantName, fullName || undefined);
+      await register(email, password, tenantName, acceptedTerms, fullName || undefined);
       navigate('/dashboard');
     } catch {
       setError('Could not create account. The email may already be registered.');
@@ -56,6 +64,24 @@ export function RegisterForm() {
         required
         minLength={8}
         autoComplete="new-password"
+      />
+      <Checkbox
+        label={
+          <>
+            I agree to the{' '}
+            <Link to="/terms" className="text-brand-blue hover:text-brand-blue-dark">
+              Terms and Conditions
+            </Link>{' '}
+            and{' '}
+            <Link to="/privacy" className="text-brand-blue hover:text-brand-blue-dark">
+              Privacy Policy
+            </Link>
+            .
+          </>
+        }
+        checked={acceptedTerms}
+        onChange={(e) => setAcceptedTerms(e.target.checked)}
+        error={termsError ?? undefined}
       />
       {error && <FormMessage>{error}</FormMessage>}
       <Button type="submit" isLoading={isLoading}>
