@@ -1,5 +1,6 @@
 from app.models.artifact import Artifact, ArtifactType
 from app.models.audit_log import AuditLog
+from app.models.contact_message import ContactMessage, ContactMessageStatus, ContactTopic
 from app.models.defect_export import DefectExport, ExportStatus
 from app.models.diagnosis import Diagnosis, DiagnosisStatus, FailureCategory
 from app.models.failure_group import FailureGroup, FailureGroupMember
@@ -18,6 +19,9 @@ __all__ = [
     "Artifact",
     "ArtifactType",
     "AuditLog",
+    "ContactMessage",
+    "ContactMessageStatus",
+    "ContactTopic",
     "DefectExport",
     "Diagnosis",
     "DiagnosisStatus",

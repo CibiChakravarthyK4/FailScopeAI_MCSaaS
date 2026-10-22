@@ -34,6 +34,20 @@ class Settings(BaseSettings):
     STRIPE_PRICE_ID_PRO: str = ""
     STRIPE_WEBHOOK_SECRET: str = ""
 
+    # Public site (Section 17): notification recipients and form protections.
+    # These are backend-only settings - frontend/src/config/company.ts is the
+    # single source for company facts *shown on pages*, but the backend can't
+    # import a frontend TS file, so the mailboxes that receive form
+    # submissions are configured here instead.
+    SUPPORT_EMAIL: str = ""
+    SALES_EMAIL: str = ""
+    HIRING_EMAIL: str = ""
+    MAIL_BACKEND: Literal["console", "file"] = "console"
+    MAIL_FILE_DIR: str = "./storage/dev-mail"
+    CAPTCHA_ENABLED: bool = False
+    PUBLIC_UPLOAD_ROOT: str = "./storage/public"
+    MAX_RESUME_SIZE_MB: int = 5
+
     class Config:
         env_file = ".env"
 

@@ -20,6 +20,7 @@ import { ExportDraftPage } from './pages/ExportDraftPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { HomePage } from './pages/HomePage';
 import { CompanyPage } from './pages/CompanyPage';
+import { ContactPage } from './pages/ContactPage';
 import { OwnerLoginPage } from './pages/owner/OwnerLoginPage';
 import { OwnerDashboardPage } from './pages/owner/OwnerDashboardPage';
 
@@ -134,6 +135,7 @@ export default function App() {
             />
             <Route path="/" element={<HomePage />} />
             <Route path="/company" element={<CompanyPage />} />
+            <Route path="/contact" element={<ContactPage />} />
           </Routes>
         </BrowserRouter>
       </OwnerAuthProvider>

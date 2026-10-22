@@ -1,0 +1,27 @@
+from pydantic import BaseModel, EmailStr, Field, field_validator
+
+from app.models.contact_message import ContactTopic
+
+
+class ContactRequest(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    email: EmailStr
+    company: str | None = Field(default=None, max_length=200)
+    topic: ContactTopic
+    message: str = Field(min_length=20, max_length=2000)
+    consent: bool
+    # Honeypot: real visitors never see or fill this field (hidden via CSS).
+    # A non-empty value means a bot filled every field - drop the
+    # submission but still return 201, so the bot has no signal to retry.
+    website: str = Field(default="", max_length=200)
+
+    @field_validator("consent")
+    @classmethod
+    def consent_required(cls, v: bool) -> bool:
+        if not v:
+            raise ValueError("Consent is required")
+        return v
+
+
+class ContactResponse(BaseModel):
+    status: str = "received"

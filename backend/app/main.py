@@ -15,6 +15,7 @@ from app.routers import (
     failure_groups,
     jobs,
     owner,
+    public,
     runs,
     search,
 )
@@ -56,6 +57,7 @@ app.include_router(dashboard.usage_router)
 app.include_router(billing.router)
 app.include_router(owner.router)
 app.include_router(search.router)
+app.include_router(public.router)
 
 
 @app.get("/health")
