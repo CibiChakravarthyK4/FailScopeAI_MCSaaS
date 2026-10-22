@@ -87,6 +87,15 @@ Tokens are defined once; components must reference tokens, never raw hex values.
 - Accessibility: text/background contrast at least WCAG AA, visible focus rings (2px `--iv-blue`), full keyboard navigation, never rely on colour alone.
 - Responsive: desktop-first, usable on tablet and mobile widths.
 
+### 4.5 App layout rules (logged-in app)
+- **Shell**: every logged-in route renders inside `<AppLayout>` (`frontend/src/components/app/AppLayout.tsx`): a left `Sidebar` (240px, collapsing to a 64px icon rail below `lg:`) plus a sticky `TopBar` (search, notifications, avatar menu) above the page content. No page renders its own nav, top bar, or sidebar.
+- **Container**: every page's content sits inside exactly one `<PageContainer>` (`frontend/src/components/app/PageContainer.tsx`, `mx-auto max-w-[1280px] px-6 py-8`), used as the direct child of `<AppLayout>`. No page may set its own top-level width or offset (no competing `max-w-*`/`mx-auto` wrapping or replacing it) - this is what keeps every page's content starting at the same left edge, and is checked automatically by `frontend/src/pages/pageLayout.test.ts`. A page needing a narrower reading width (Settings, Profile, export forms) nests an inner `<div className="max-w-2xl">` *inside* the full-width `PageContainer`, never passed in via a `className` prop (conflicting Tailwind width utilities resolve by order in the compiled stylesheet, not by prop order, so a `className="max-w-2xl"` on `PageContainer` can silently lose to its own hardcoded `max-w-[1280px]`).
+- **Page header**: every page's title uses the shared `<PageHeader>` (`frontend/src/components/app/PageHeader.tsx`) - optional breadcrumbs, an `<h1>` title, optional description, optional right-aligned action - instead of a hand-rolled `<h1>`.
+- **Spacing**: stick to the 8px scale (`gap-2`, `gap-4`, `gap-6`, `px-6`, `py-8`, …) already used by `PageContainer`/`PageHeader`/`Card`; don't introduce one-off spacing values.
+- **Empty states**: use the shared `<EmptyState>` (`frontend/src/components/app/EmptyState.tsx`) - Trace Ring + message + optional action - instead of ad hoc "no data" text.
+- **Wizard pattern**: a multi-step flow (for example Import run) uses the shared `<Stepper>` (`frontend/src/components/app/Stepper.tsx`) inside a centred `max-w-[880px]` column within `PageContainer`, with step labels hidden below `sm:` (icon-only circles) to avoid horizontal overflow on narrow screens.
+- **Verification**: after changing any app-shell page, screenshot it at 1440/1024/390px and check `document.documentElement.scrollWidth === clientWidth` at each width (no horizontal overflow) before considering the change done.
+
 ---
 
 ## 5. Technology Stack
