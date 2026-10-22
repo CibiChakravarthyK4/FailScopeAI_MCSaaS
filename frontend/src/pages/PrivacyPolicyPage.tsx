@@ -116,12 +116,11 @@ export function PrivacyPolicyPage() {
             <p className="mt-3 text-muted">
               We share data with a small number of service providers who help us run RootTrace Ivory - for example,
               cloud hosting, a language model provider for diagnosis, and (if you connect it) Jira for defect export.
-              We are preparing a full subprocessors list; in the meantime, email us at{' '}
-              <a href={`mailto:${company.supportEmail}`} className="text-brand-blue hover:text-brand-blue-dark">
-                {company.supportEmail}
-              </a>{' '}
-              if you need details for your own compliance review. We do not share your data with anyone else except
-              where the law requires it.
+              See our full{' '}
+              <Link to="/subprocessors" className="text-brand-blue hover:text-brand-blue-dark">
+                Subprocessors
+              </Link>{' '}
+              list for details. We do not share your data with anyone else except where the law requires it.
             </p>
           </section>
 
