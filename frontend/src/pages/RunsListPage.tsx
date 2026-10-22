@@ -25,7 +25,7 @@ export function RunsListPage() {
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-ink">Runs</h1>
           <Link to="/runs/new">
-            <Button className="w-auto px-4">Import run</Button>
+            <Button fullWidth={false} className="px-4">Import run</Button>
           </Link>
         </div>
 

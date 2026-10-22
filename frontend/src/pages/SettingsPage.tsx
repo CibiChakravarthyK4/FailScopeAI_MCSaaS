@@ -63,7 +63,7 @@ export function SettingsPage() {
 
               {billing?.configured ? (
                 usage.plan !== 'pro' ? (
-                  <Button className="w-auto px-4" onClick={handleUpgrade} isLoading={isCheckingOut}>
+                  <Button fullWidth={false} className="px-4" onClick={handleUpgrade} isLoading={isCheckingOut}>
                     Upgrade to Pro
                   </Button>
                 ) : (

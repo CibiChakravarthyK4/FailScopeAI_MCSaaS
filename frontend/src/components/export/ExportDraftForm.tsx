@@ -92,7 +92,7 @@ export function ExportDraftForm({ testCaseId }: { testCaseId: number | null }) {
       {draft.status === 'published' ? (
         <FormMessage variant="success">Published as {draft.jira_issue_key}</FormMessage>
       ) : (
-        <Button className="w-auto px-4" onClick={handlePublish} isLoading={isLoading}>
+        <Button fullWidth={false} className="px-4" onClick={handlePublish} isLoading={isLoading}>
           Publish to Jira (sandbox)
         </Button>
       )}

@@ -39,7 +39,7 @@ export function Navbar() {
         {user && (
           <div className="ml-auto flex items-center gap-4">
             <span className="text-sm text-muted">{user.email}</span>
-            <Button variant="secondary" className="w-auto px-4 py-2" onClick={handleLogout}>
+            <Button variant="secondary" fullWidth={false} className="px-4 py-2" onClick={handleLogout}>
               Log out
             </Button>
           </div>

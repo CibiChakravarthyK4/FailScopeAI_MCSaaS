@@ -65,7 +65,7 @@ export function OwnerDashboardPage() {
             <TraceRing size={22} />
             RootTrace <span className="text-brand-blue">Ivory</span> · Platform Owner
           </p>
-          <Button variant="secondary" className="w-auto px-4 py-2" onClick={handleLogout}>
+          <Button variant="secondary" fullWidth={false} className="px-4 py-2" onClick={handleLogout}>
             Log out
           </Button>
         </div>
@@ -98,7 +98,7 @@ export function OwnerDashboardPage() {
 
             <div className="mb-8 flex items-center justify-between">
               <h2 className="text-sm font-medium text-ink">Billing report</h2>
-              <Button variant="secondary" className="w-auto px-4" onClick={handleExport} isLoading={isExporting}>
+              <Button variant="secondary" fullWidth={false} className="px-4" onClick={handleExport} isLoading={isExporting}>
                 Export CSV
               </Button>
             </div>

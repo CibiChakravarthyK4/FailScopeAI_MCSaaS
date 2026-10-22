@@ -177,7 +177,7 @@ export function CaseFilePage() {
                   (!diagnosis ? (
                     <Card>
                       <p className="mb-3 text-sm text-muted">No diagnosis yet for this test case.</p>
-                      <Button className="w-auto px-4" onClick={handleInvestigate} isLoading={isInvestigating}>
+                      <Button fullWidth={false} className="px-4" onClick={handleInvestigate} isLoading={isInvestigating}>
                         Investigate with AI
                       </Button>
                       {investigateError && (
@@ -207,12 +207,12 @@ export function CaseFilePage() {
                         <Card>
                           <p className="mb-3 text-sm font-medium text-ink">Reviewer action</p>
                           <div className="mb-3 flex gap-3">
-                            <Button className="w-auto px-4" onClick={() => handleReview('accept')} isLoading={isReviewing}>
+                            <Button fullWidth={false} className="px-4" onClick={() => handleReview('accept')} isLoading={isReviewing}>
                               Accept
                             </Button>
                             <Button
                               variant="secondary"
-                              className="w-auto px-4"
+                              fullWidth={false} className="px-4"
                               onClick={() => handleReview('reject')}
                               isLoading={isReviewing}
                             >
@@ -239,7 +239,7 @@ export function CaseFilePage() {
                             />
                             <Button
                               variant="secondary"
-                              className="w-auto px-4"
+                              fullWidth={false} className="px-4"
                               onClick={() => handleReview('correct')}
                               isLoading={isReviewing}
                             >
@@ -253,7 +253,7 @@ export function CaseFilePage() {
                           )}
                         </Card>
                       ) : (
-                        <Button className="w-auto px-4" onClick={() => setTab('export')}>
+                        <Button fullWidth={false} className="px-4" onClick={() => setTab('export')}>
                           Create defect export
                         </Button>
                       )}

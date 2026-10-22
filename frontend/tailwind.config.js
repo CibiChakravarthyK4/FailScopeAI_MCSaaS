@@ -32,7 +32,7 @@ export default {
       },
       borderRadius: {
         md: '6px',
-        lg: '10px',
+        lg: '8px', // CLAUDE.md 4.4: "8px radius on inputs and cards"
       },
     },
   },
