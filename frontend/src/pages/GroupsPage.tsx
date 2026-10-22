@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Navbar } from '../components/layout/Navbar';
-import { PageWrapper } from '../components/layout/PageWrapper';
+import { AppLayout } from '../components/app/AppLayout';
+import { PageContainer } from '../components/app/PageContainer';
+import { PageHeader } from '../components/app/PageHeader';
 import { Card } from '../components/ui/Card';
 import { listFailureGroups } from '../services/diagnosisService';
 import type { FailureGroup } from '../types';
@@ -16,10 +17,9 @@ export function GroupsPage() {
   }, []);
 
   return (
-    <PageWrapper>
-      <Navbar />
-      <div className="mx-auto max-w-4xl px-6 py-10">
-        <h1 className="mb-6 text-xl font-semibold text-ink">Recurring failure groups</h1>
+    <AppLayout>
+      <PageContainer>
+        <PageHeader title="Recurring failure groups" description="Failures that keep recurring across test cases and runs." />
 
         {isLoading ? (
           <p className="text-sm text-muted">Loading...</p>
@@ -44,7 +44,7 @@ export function GroupsPage() {
               ))}
           </Card>
         )}
-      </div>
-    </PageWrapper>
+      </PageContainer>
+    </AppLayout>
   );
 }

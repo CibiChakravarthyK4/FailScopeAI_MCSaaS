@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Navbar } from '../components/layout/Navbar';
-import { PageWrapper } from '../components/layout/PageWrapper';
+import { AppLayout } from '../components/app/AppLayout';
+import { PageContainer } from '../components/app/PageContainer';
+import { PageHeader } from '../components/app/PageHeader';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { FormMessage } from '../components/ui/FormMessage';
@@ -44,11 +45,10 @@ export function SettingsPage() {
   };
 
   return (
-    <PageWrapper>
-      <Navbar />
-      <div className="mx-auto max-w-2xl px-6 py-10">
-        <h1 className="mb-6 text-xl font-semibold text-ink">Usage &amp; settings</h1>
-
+    <AppLayout>
+      <PageContainer>
+        <PageHeader title="Usage & settings" description="Plan, model cost and storage usage for this workspace." />
+        <div className="max-w-2xl">
         {isLoading ? (
           <p className="text-sm text-muted">Loading...</p>
         ) : usage ? (
@@ -119,7 +119,8 @@ export function SettingsPage() {
         ) : (
           <p className="text-sm text-muted">No usage recorded yet.</p>
         )}
-      </div>
-    </PageWrapper>
+        </div>
+      </PageContainer>
+    </AppLayout>
   );
 }

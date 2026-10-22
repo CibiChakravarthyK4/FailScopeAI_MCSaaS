@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Navbar } from '../components/layout/Navbar';
-import { PageWrapper } from '../components/layout/PageWrapper';
+import { AppLayout } from '../components/app/AppLayout';
+import { PageContainer } from '../components/app/PageContainer';
+import { PageHeader } from '../components/app/PageHeader';
 import { Card } from '../components/ui/Card';
 import { ConfidenceMeter } from '../components/ui/ConfidenceMeter';
 import { TaxonomyChip } from '../components/ui/TaxonomyChip';
@@ -19,10 +20,9 @@ export function ReviewQueuePage() {
   }, []);
 
   return (
-    <PageWrapper>
-      <Navbar />
-      <div className="mx-auto max-w-4xl px-6 py-10">
-        <h1 className="mb-6 text-xl font-semibold text-ink">Review queue</h1>
+    <AppLayout>
+      <PageContainer>
+        <PageHeader title="Review queue" description="Diagnoses waiting for a reviewer to accept, reject or correct." />
 
         {isLoading ? (
           <p className="text-sm text-muted">Loading...</p>
@@ -49,7 +49,7 @@ export function ReviewQueuePage() {
             ))}
           </Card>
         )}
-      </div>
-    </PageWrapper>
+      </PageContainer>
+    </AppLayout>
   );
 }
