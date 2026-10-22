@@ -24,6 +24,19 @@ export function LoginPage() {
             Create one
           </Link>
         </p>
+        <p className="mt-4 text-center text-xs text-muted">
+          <Link to="/privacy" className="hover:text-ink">
+            Privacy Policy
+          </Link>
+          {' · '}
+          <Link to="/terms" className="hover:text-ink">
+            Terms and Conditions
+          </Link>
+          {' · '}
+          <Link to="/help" className="hover:text-ink">
+            Help Center
+          </Link>
+        </p>
       </div>
     </PageWrapper>
   );

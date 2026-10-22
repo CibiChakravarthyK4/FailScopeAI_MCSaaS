@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /runs
+Disallow: /profile
+Disallow: /settings
+Disallow: /review-queue
+Disallow: /groups
+Disallow: /exports
+Disallow: /diagnoses
+Disallow: /owner
+Disallow: /auth
+
+Sitemap: /sitemap.xml
