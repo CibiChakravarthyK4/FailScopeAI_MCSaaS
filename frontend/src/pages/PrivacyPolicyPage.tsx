@@ -179,12 +179,11 @@ export function PrivacyPolicyPage() {
           <section id="cookies">
             <h2 className="text-xl font-semibold text-ink">Cookies</h2>
             <p className="mt-3 text-muted">
-              We currently use only essential cookies needed to keep you signed in and to remember basic preferences.
-              We do not currently use analytics or advertising cookies. See our{' '}
+              We don't currently set any cookies - your session is kept using browser local storage instead. See our{' '}
               <Link to="/cookies" className="text-brand-blue hover:text-brand-blue-dark">
                 Cookie Policy
               </Link>{' '}
-              for more detail once it is published.
+              for detail and what happens if that changes.
             </p>
           </section>
 
