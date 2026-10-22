@@ -1,12 +1,51 @@
 from rq import Retry
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.job import Job, JobStatus, JobType
 from app.models.run import Run, RunStatus
+from app.models.test_case import TestCase
+from app.models.user import User
+from app.schemas.run import RunResponse
 from app.services import audit_service, usage_service
 from app.services.junit_parser import parse_junit_xml
 from app.storage.local_storage import save_artifact
 from app.workers.queue import import_queue
+
+
+def runs_to_responses(db: Session, runs: list[Run]) -> list[RunResponse]:
+    """Batched, not one query per row - the Runs table can list many rows at once."""
+    if not runs:
+        return []
+    run_ids = [r.id for r in runs]
+    user_ids = {r.imported_by for r in runs}
+
+    failure_counts: dict[int, int] = {
+        row[0]: row[1]
+        for row in db.query(TestCase.run_id, func.count(TestCase.id))
+        .filter(TestCase.run_id.in_(run_ids))
+        .group_by(TestCase.run_id)
+        .all()
+    }
+    emails: dict[int, str] = {
+        row[0]: row[1] for row in db.query(User.id, User.email).filter(User.id.in_(user_ids)).all()
+    }
+
+    return [
+        RunResponse(
+            id=r.id,
+            external_run_id=r.external_run_id,
+            build_id=r.build_id,
+            branch=r.branch,
+            environment=r.environment,
+            source_type=r.source_type,
+            status=r.status,
+            created_at=r.created_at,
+            failure_count=failure_counts.get(r.id, 0),
+            imported_by_email=emails.get(r.imported_by),
+        )
+        for r in runs
+    ]
 
 
 def import_run(
@@ -15,6 +54,7 @@ def import_run(
     user_id: int,
     external_run_id: str,
     build_id: str | None,
+    branch: str | None,
     environment: str | None,
     junit_filename: str,
     junit_content: bytes,
@@ -34,6 +74,7 @@ def import_run(
         tenant_id=tenant_id,
         external_run_id=external_run_id,
         build_id=build_id,
+        branch=branch,
         environment=environment,
         source_type="junit",
         status=RunStatus.pending,

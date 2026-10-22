@@ -12,6 +12,11 @@ from sqlalchemy.orm import sessionmaker
 os.environ.setdefault("DATABASE_URL", "postgresql+psycopg2://failscope:failscope@127.0.0.1:5433/failscope_test")
 os.environ.setdefault("SECRET_KEY", "test-secret-key")
 os.environ.setdefault("STORAGE_ROOT", tempfile.mkdtemp(prefix="failscope-test-storage-"))
+# Process env vars take priority over .env in pydantic-settings, so this
+# isolates tests from whatever real key is in backend/.env for local dev -
+# without it, "no API key configured" tests fail the moment a real key is
+# added there, since they'd otherwise silently inherit it.
+os.environ.setdefault("OPENAI_API_KEY", "")
 
 # 127.0.0.1, not "localhost": Docker Desktop's port forwarding for this port is
 # flaky over IPv6 (::1), which "localhost" sometimes resolves to first on this

@@ -72,7 +72,15 @@ def logout(req: LogoutRequest, db: Session = Depends(get_db)):
 
 @router.get("/me", response_model=UserResponse)
 def me(user=Depends(get_current_user)):
-    return user
+    return UserResponse(
+        id=user.id,
+        tenant_id=user.tenant_id,
+        email=user.email,
+        full_name=user.full_name,
+        role=user.role,
+        is_active=user.is_active,
+        tenant_name=user.tenant.name,
+    )
 
 
 @router.get("/google/login")

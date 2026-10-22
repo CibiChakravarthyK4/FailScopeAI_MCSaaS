@@ -34,6 +34,7 @@ class UserResponse(BaseModel):
     full_name: str | None
     role: str
     is_active: bool
+    tenant_name: str
 
     class Config:
         from_attributes = True

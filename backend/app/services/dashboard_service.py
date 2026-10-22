@@ -3,9 +3,11 @@ from datetime import UTC, datetime
 from sqlalchemy.orm import Session
 
 from app.exceptions import NotFoundError
+from app.models.defect_export import DefectExport, ExportStatus
 from app.models.diagnosis import Diagnosis, DiagnosisStatus
 from app.models.failure_group import FailureGroup, FailureGroupMember
 from app.models.review import Review, ReviewAction
+from app.models.run import Run
 from app.models.tenant import Tenant
 from app.models.usage_record import UsageRecord
 from app.services.billing_service import get_plan_limits
@@ -71,6 +73,13 @@ def compute_metrics(db: Session, tenant_id: int) -> dict:
     total_reviewed_actions = accepted + rejected + corrected
     agreement_rate = (accepted / total_reviewed_actions) if total_reviewed_actions else None
 
+    runs_imported = db.query(Run).filter(Run.tenant_id == tenant_id).count()
+    exports_published = (
+        db.query(DefectExport)
+        .filter(DefectExport.tenant_id == tenant_id, DefectExport.status == ExportStatus.published)
+        .count()
+    )
+
     return {
         "total_diagnoses": total,
         "pending_review": pending,
@@ -79,6 +88,8 @@ def compute_metrics(db: Session, tenant_id: int) -> dict:
         "rejected": rejected,
         "corrected": corrected,
         "reviewer_agreement_rate": agreement_rate,
+        "runs_imported": runs_imported,
+        "exports_published": exports_published,
         "note": (
             "Agreement rate = accepted / (accepted + rejected + corrected) reviews. "
             "Investigation-time-saved and holdout-precision metrics require a recorded "

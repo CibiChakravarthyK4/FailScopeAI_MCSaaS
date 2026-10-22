@@ -26,6 +26,7 @@ def test_me_returns_current_user(client):
     assert resp.status_code == 200
     body = resp.json()
     assert body["email"] == "qa@example.com"
+    assert body["tenant_name"] == "Acme QA"
     assert body["role"] == "admin"
 
 

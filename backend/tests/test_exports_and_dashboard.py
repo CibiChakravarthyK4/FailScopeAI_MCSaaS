@@ -113,6 +113,8 @@ def test_dashboard_metrics_agreement_rate(client, monkeypatch):
     metrics = client.get("/api/dashboard/metrics", headers=headers).json()
     assert metrics["accepted"] == 1
     assert metrics["reviewer_agreement_rate"] == 1.0
+    assert metrics["runs_imported"] == 1
+    assert metrics["exports_published"] == 0
 
 
 def test_usage_tracks_model_calls(client, monkeypatch):

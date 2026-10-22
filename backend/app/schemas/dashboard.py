@@ -20,6 +20,8 @@ class MetricsResponse(BaseModel):
     rejected: int
     corrected: int
     reviewer_agreement_rate: float | None
+    runs_imported: int
+    exports_published: int
     note: str
 
 

@@ -21,10 +21,13 @@ class RunResponse(BaseModel):
     id: int
     external_run_id: str
     build_id: str | None
+    branch: str | None
     environment: str | None
     source_type: str
     status: str
     created_at: datetime
+    failure_count: int
+    imported_by_email: str | None
 
     class Config:
         from_attributes = True

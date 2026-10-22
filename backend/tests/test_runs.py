@@ -30,6 +30,21 @@ def test_import_run_creates_test_cases(client):
     assert detail["status"] == "completed"
     names = {tc["name"] for tc in detail["test_cases"]}
     assert names == {"test_login_failure", "test_login_timeout"}
+    assert detail["failure_count"] == 2
+    assert detail["imported_by_email"] == "qa@example.com"
+
+
+def test_list_runs_includes_failure_count_and_importer(client):
+    headers = _headers(client)
+    client.post(
+        "/api/runs/import",
+        headers=headers,
+        data={"external_run_id": "build-list-1"},
+        files={"junit_file": ("j.xml", VALID_JUNIT, "application/xml")},
+    )
+    runs = client.get("/api/runs", headers=headers).json()
+    assert runs[0]["failure_count"] == 2
+    assert runs[0]["imported_by_email"] == "qa@example.com"
 
 
 def test_reimport_same_external_run_id_is_idempotent(client):
