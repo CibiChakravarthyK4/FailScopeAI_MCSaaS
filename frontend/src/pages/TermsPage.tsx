@@ -77,8 +77,11 @@ export function TermsPage() {
             <h2 className="text-xl font-semibold text-ink">Acceptable use</h2>
             <p className="mt-3 text-muted">
               You agree not to misuse the service - for example, attempting to access another workspace's data,
-              disrupting the service, or uploading unlawful content. See our Acceptable Use Policy (coming soon) for
-              more detail.
+              disrupting the service, or uploading unlawful content. See our{' '}
+              <Link to="/acceptable-use" className="text-brand-blue hover:text-brand-blue-dark">
+                Acceptable Use Policy
+              </Link>{' '}
+              for more detail.
             </p>
           </section>
 
