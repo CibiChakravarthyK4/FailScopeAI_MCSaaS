@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { PageWrapper } from '../../components/layout/PageWrapper';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -65,9 +65,14 @@ export function OwnerDashboardPage() {
             <TraceRing size={22} />
             RootTrace <span className="text-brand-blue">Ivory</span> · Platform Owner
           </p>
-          <Button variant="secondary" fullWidth={false} className="px-4 py-2" onClick={handleLogout}>
-            Log out
-          </Button>
+          <div className="flex items-center gap-3">
+            <Link to="/owner/careers" className="text-sm font-medium text-brand-blue hover:text-brand-blue-dark">
+              Career applications
+            </Link>
+            <Button variant="secondary" fullWidth={false} className="px-4 py-2" onClick={handleLogout}>
+              Log out
+            </Button>
+          </div>
         </div>
       </header>
 

@@ -1,5 +1,6 @@
 from app.models.artifact import Artifact, ArtifactType
 from app.models.audit_log import AuditLog
+from app.models.career_application import CareerApplication, CareerApplicationStatus
 from app.models.contact_message import ContactMessage, ContactMessageStatus, ContactTopic
 from app.models.defect_export import DefectExport, ExportStatus
 from app.models.demo_request import DemoRequest, DemoRequestStatus, TeamSize
@@ -22,6 +23,8 @@ __all__ = [
     "Artifact",
     "ArtifactType",
     "AuditLog",
+    "CareerApplication",
+    "CareerApplicationStatus",
     "ContactMessage",
     "ContactMessageStatus",
     "ContactTopic",

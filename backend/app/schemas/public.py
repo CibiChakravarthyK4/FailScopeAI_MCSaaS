@@ -58,3 +58,16 @@ class HelpArticleFeedbackCreate(BaseModel):
 
 class HelpArticleFeedbackResponse(BaseModel):
     status: str = "received"
+
+
+class CareerRoleResponse(BaseModel):
+    title: str
+    team: str
+    location: str
+    type: str
+    description: str
+    requirements: list[str]
+
+
+class CareerApplicationResponse(BaseModel):
+    status: str = "received"

@@ -31,6 +31,9 @@ import { HelpCenterPage } from './pages/HelpCenterPage';
 import { HelpArticlePage } from './pages/HelpArticlePage';
 import { OwnerLoginPage } from './pages/owner/OwnerLoginPage';
 import { OwnerDashboardPage } from './pages/owner/OwnerDashboardPage';
+import { OwnerCareersApplicationsPage } from './pages/owner/OwnerCareersApplicationsPage';
+import { OwnerCareerApplicationDetailPage } from './pages/owner/OwnerCareerApplicationDetailPage';
+import { CareersPage } from './pages/CareersPage';
 
 const queryClient = new QueryClient();
 
@@ -141,6 +144,22 @@ export default function App() {
                 </OwnerProtectedRoute>
               }
             />
+            <Route
+              path="/owner/careers"
+              element={
+                <OwnerProtectedRoute>
+                  <OwnerCareersApplicationsPage />
+                </OwnerProtectedRoute>
+              }
+            />
+            <Route
+              path="/owner/careers/:id"
+              element={
+                <OwnerProtectedRoute>
+                  <OwnerCareerApplicationDetailPage />
+                </OwnerProtectedRoute>
+              }
+            />
             <Route path="/" element={<HomePage />} />
             <Route path="/company" element={<CompanyPage />} />
             <Route path="/contact" element={<ContactPage />} />
@@ -152,6 +171,7 @@ export default function App() {
             <Route path="/demo" element={<DemoPage />} />
             <Route path="/help" element={<HelpCenterPage />} />
             <Route path="/help/:slug" element={<HelpArticlePage />} />
+            <Route path="/careers" element={<CareersPage />} />
           </Routes>
         </BrowserRouter>
       </OwnerAuthProvider>

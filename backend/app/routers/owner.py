@@ -1,13 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import FileResponse, PlainTextResponse
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import get_current_owner
+from app.models.career_application import CareerApplication
 from app.models.platform_owner import PlatformOwner
 from app.rate_limit import rate_limit_by_ip
 from app.schemas.owner import (
     BillingReportResponse,
+    CareerApplicationDetail,
+    CareerApplicationStatusUpdate,
+    CareerApplicationSummary,
     ClientSummary,
     OwnerLoginRequest,
     OwnerTokenResponse,
@@ -61,3 +65,65 @@ def billing_report_csv(db: Session = Depends(get_db), owner: PlatformOwner = Dep
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=billing-report.csv"},
     )
+
+
+def _get_application_or_404(db: Session, application_id: int) -> CareerApplication:
+    application = db.query(CareerApplication).filter(CareerApplication.id == application_id).first()
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    return application
+
+
+@router.get("/careers/applications", response_model=list[CareerApplicationSummary])
+def list_career_applications(db: Session = Depends(get_db), owner: PlatformOwner = Depends(get_current_owner)):
+    applications = db.query(CareerApplication).order_by(CareerApplication.created_at.desc()).all()
+    owner_audit_service.record(
+        db, owner.id, "owner_viewed_career_applications", "career_application", metadata={"count": len(applications)}
+    )
+    return applications
+
+
+@router.get("/careers/applications/{application_id}", response_model=CareerApplicationDetail)
+def get_career_application(
+    application_id: int, db: Session = Depends(get_db), owner: PlatformOwner = Depends(get_current_owner)
+):
+    application = _get_application_or_404(db, application_id)
+    owner_audit_service.record(db, owner.id, "owner_viewed_career_application", "career_application", application.id)
+    return application
+
+
+@router.get("/careers/applications/{application_id}/resume")
+def download_career_application_resume(
+    application_id: int, db: Session = Depends(get_db), owner: PlatformOwner = Depends(get_current_owner)
+):
+    application = _get_application_or_404(db, application_id)
+    owner_audit_service.record(
+        db, owner.id, "owner_downloaded_career_application_resume", "career_application", application.id
+    )
+    return FileResponse(
+        application.resume_path,
+        filename=application.resume_original_filename,
+        media_type="application/octet-stream",
+    )
+
+
+@router.patch("/careers/applications/{application_id}/status", response_model=CareerApplicationDetail)
+def update_career_application_status(
+    application_id: int,
+    req: CareerApplicationStatusUpdate,
+    db: Session = Depends(get_db),
+    owner: PlatformOwner = Depends(get_current_owner),
+):
+    application = _get_application_or_404(db, application_id)
+    application.status = req.status
+    db.commit()
+    db.refresh(application)
+    owner_audit_service.record(
+        db,
+        owner.id,
+        "owner_updated_career_application_status",
+        "career_application",
+        application.id,
+        metadata={"status": req.status.value},
+    )
+    return application
