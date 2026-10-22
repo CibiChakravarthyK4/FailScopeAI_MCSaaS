@@ -22,6 +22,7 @@ import { HomePage } from './pages/HomePage';
 import { CompanyPage } from './pages/CompanyPage';
 import { ContactPage } from './pages/ContactPage';
 import { PricingPage } from './pages/PricingPage';
+import { SecurityPage } from './pages/SecurityPage';
 import { OwnerLoginPage } from './pages/owner/OwnerLoginPage';
 import { OwnerDashboardPage } from './pages/owner/OwnerDashboardPage';
 
@@ -138,6 +139,7 @@ export default function App() {
             <Route path="/company" element={<CompanyPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/security" element={<SecurityPage />} />
           </Routes>
         </BrowserRouter>
       </OwnerAuthProvider>
