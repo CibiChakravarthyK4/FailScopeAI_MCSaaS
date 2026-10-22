@@ -34,11 +34,22 @@ import { OwnerDashboardPage } from './pages/owner/OwnerDashboardPage';
 import { OwnerCareersApplicationsPage } from './pages/owner/OwnerCareersApplicationsPage';
 import { OwnerCareerApplicationDetailPage } from './pages/owner/OwnerCareerApplicationDetailPage';
 import { CareersPage } from './pages/CareersPage';
+import { FaqPage } from './pages/FaqPage';
+import { IntegrationsPage } from './pages/IntegrationsPage';
+import { ProductTourPage } from './pages/ProductTourPage';
+import { SubprocessorsPage } from './pages/SubprocessorsPage';
+import { CookiePolicyPage } from './pages/CookiePolicyPage';
+import { AcceptableUsePage } from './pages/AcceptableUsePage';
+import { NotFoundPage } from './pages/NotFoundPage';
+import { ServerErrorPage } from './pages/ServerErrorPage';
+import { MaintenancePage } from './pages/MaintenancePage';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const queryClient = new QueryClient();
 
 export default function App() {
   return (
+    <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
       <OwnerAuthProvider>
@@ -172,10 +183,20 @@ export default function App() {
             <Route path="/help" element={<HelpCenterPage />} />
             <Route path="/help/:slug" element={<HelpArticlePage />} />
             <Route path="/careers" element={<CareersPage />} />
+            <Route path="/faq" element={<FaqPage />} />
+            <Route path="/integrations" element={<IntegrationsPage />} />
+            <Route path="/tour" element={<ProductTourPage />} />
+            <Route path="/subprocessors" element={<SubprocessorsPage />} />
+            <Route path="/cookies" element={<CookiePolicyPage />} />
+            <Route path="/acceptable-use" element={<AcceptableUsePage />} />
+            <Route path="/500" element={<ServerErrorPage />} />
+            <Route path="/maintenance" element={<MaintenancePage />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </BrowserRouter>
       </OwnerAuthProvider>
       </AuthProvider>
     </QueryClientProvider>
+    </ErrorBoundary>
   );
 }

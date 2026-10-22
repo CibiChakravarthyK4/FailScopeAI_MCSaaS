@@ -5,14 +5,18 @@ import { TraceRing } from '../ui/TraceRing';
 import { Container } from './Container';
 import { NavDropdown } from './NavDropdown';
 
-// Integrations, Product Tour, FAQ and Blog are Phase 2/3 pages that don't
-// exist yet - they join these dropdowns as each one ships, rather than
-// linking to a route that 404s.
+// Blog is a Phase 3 page that doesn't exist yet - it joins Resources once
+// it ships, rather than linking to a route that 404s.
 const PRODUCT_ITEMS = [
   { label: 'Overview', href: '/#product' },
   { label: 'How it works', href: '/#how-it-works' },
+  { label: 'Integrations', href: '/integrations' },
+  { label: 'Product Tour', href: '/tour' },
 ];
-const RESOURCES_ITEMS = [{ label: 'Help Center', href: '/help' }];
+const RESOURCES_ITEMS = [
+  { label: 'Help Center', href: '/help' },
+  { label: 'FAQ', href: '/faq' },
+];
 const COMPANY_ITEMS = [
   { label: 'Company Overview', href: '/company' },
   { label: 'Join our Team', href: '/careers' },
@@ -94,6 +98,12 @@ export function MarketingHeader() {
             <a href="/#how-it-works" className="rounded-md px-2 py-2 text-sm font-medium text-ink hover:bg-brand-blue-light">
               How it works
             </a>
+            <Link to="/integrations" className="rounded-md px-2 py-2 text-sm font-medium text-ink hover:bg-brand-blue-light">
+              Integrations
+            </Link>
+            <Link to="/tour" className="rounded-md px-2 py-2 text-sm font-medium text-ink hover:bg-brand-blue-light">
+              Product Tour
+            </Link>
             <Link to="/pricing" className="rounded-md px-2 py-2 text-sm font-medium text-ink hover:bg-brand-blue-light">
               Pricing
             </Link>
@@ -102,6 +112,9 @@ export function MarketingHeader() {
             </Link>
             <Link to="/help" className="rounded-md px-2 py-2 text-sm font-medium text-ink hover:bg-brand-blue-light">
               Help Center
+            </Link>
+            <Link to="/faq" className="rounded-md px-2 py-2 text-sm font-medium text-ink hover:bg-brand-blue-light">
+              FAQ
             </Link>
             <Link to="/company" className="rounded-md px-2 py-2 text-sm font-medium text-ink hover:bg-brand-blue-light">
               Company Overview

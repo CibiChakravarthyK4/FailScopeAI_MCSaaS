@@ -34,6 +34,16 @@ export function MarketingFooter() {
                   Security
                 </Link>
               </li>
+              <li>
+                <Link to="/integrations" className="hover:text-ink">
+                  Integrations
+                </Link>
+              </li>
+              <li>
+                <Link to="/tour" className="hover:text-ink">
+                  Product Tour
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -74,6 +84,21 @@ export function MarketingFooter() {
               <li>
                 <Link to="/terms" className="hover:text-ink">
                   Terms and Conditions
+                </Link>
+              </li>
+              <li>
+                <Link to="/cookies" className="hover:text-ink">
+                  Cookie Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/acceptable-use" className="hover:text-ink">
+                  Acceptable Use Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/subprocessors" className="hover:text-ink">
+                  Subprocessors
                 </Link>
               </li>
               <li>
