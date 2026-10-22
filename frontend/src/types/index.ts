@@ -7,6 +7,7 @@ export interface User {
   full_name: string | null;
   role: UserRole;
   is_active: boolean;
+  tenant_name: string;
 }
 
 export interface TokenResponse {
@@ -32,10 +33,13 @@ export interface Run {
   id: number;
   external_run_id: string;
   build_id: string | null;
+  branch: string | null;
   environment: string | null;
   source_type: string;
   status: RunStatus;
   created_at: string;
+  failure_count: number;
+  imported_by_email: string | null;
 }
 
 export interface RunDetail extends Run {

@@ -24,6 +24,7 @@ export async function getHistory(runId: number, testCaseId: number): Promise<His
 export async function importRun(form: {
   externalRunId: string;
   buildId?: string;
+  branch?: string;
   environment?: string;
   junitFile: File;
   attachments: File[];
@@ -31,6 +32,7 @@ export async function importRun(form: {
   const body = new FormData();
   body.append('external_run_id', form.externalRunId);
   if (form.buildId) body.append('build_id', form.buildId);
+  if (form.branch) body.append('branch', form.branch);
   if (form.environment) body.append('environment', form.environment);
   body.append('junit_file', form.junitFile);
   form.attachments.forEach((file) => body.append('attachments', file));

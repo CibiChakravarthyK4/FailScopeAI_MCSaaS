@@ -7,7 +7,15 @@ import * as AuthContextModule from '../../context/AuthContext';
 describe('ProtectedRoute', () => {
   it('renders children when a user is present', () => {
     vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({
-      user: { id: 1, tenant_id: 1, email: 'a@example.com', full_name: null, role: 'admin', is_active: true },
+      user: {
+        id: 1,
+        tenant_id: 1,
+        email: 'a@example.com',
+        full_name: null,
+        role: 'admin',
+        is_active: true,
+        tenant_name: 'Acme',
+      },
       isLoading: false,
       login: vi.fn(),
       register: vi.fn(),

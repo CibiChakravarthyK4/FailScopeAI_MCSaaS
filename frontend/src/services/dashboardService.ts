@@ -17,6 +17,8 @@ export interface Metrics {
   rejected: number;
   corrected: number;
   reviewer_agreement_rate: number | null;
+  runs_imported: number;
+  exports_published: number;
   note: string;
 }
 

@@ -17,7 +17,15 @@ function Probe() {
   );
 }
 
-const fakeUser = { id: 1, tenant_id: 1, email: 'a@example.com', full_name: 'A', role: 'admin' as const, is_active: true };
+const fakeUser = {
+  id: 1,
+  tenant_id: 1,
+  email: 'a@example.com',
+  full_name: 'A',
+  role: 'admin' as const,
+  is_active: true,
+  tenant_name: 'Acme',
+};
 
 beforeEach(() => {
   localStorage.clear();
