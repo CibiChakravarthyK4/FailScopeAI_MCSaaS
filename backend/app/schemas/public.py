@@ -49,3 +49,12 @@ class DemoRequestCreate(BaseModel):
 
 class DemoRequestResponse(BaseModel):
     status: str = "received"
+
+
+class HelpArticleFeedbackCreate(BaseModel):
+    slug: str = Field(min_length=1, max_length=200)
+    helpful: bool
+
+
+class HelpArticleFeedbackResponse(BaseModel):
+    status: str = "received"

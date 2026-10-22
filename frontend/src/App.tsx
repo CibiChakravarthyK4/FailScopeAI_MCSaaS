@@ -27,6 +27,8 @@ import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsPage } from './pages/TermsPage';
 import { AcceptTermsPage } from './pages/AcceptTermsPage';
 import { DemoPage } from './pages/DemoPage';
+import { HelpCenterPage } from './pages/HelpCenterPage';
+import { HelpArticlePage } from './pages/HelpArticlePage';
 import { OwnerLoginPage } from './pages/owner/OwnerLoginPage';
 import { OwnerDashboardPage } from './pages/owner/OwnerDashboardPage';
 
@@ -148,6 +150,8 @@ export default function App() {
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/accept-terms" element={<AcceptTermsPage />} />
             <Route path="/demo" element={<DemoPage />} />
+            <Route path="/help" element={<HelpCenterPage />} />
+            <Route path="/help/:slug" element={<HelpArticlePage />} />
           </Routes>
         </BrowserRouter>
       </OwnerAuthProvider>

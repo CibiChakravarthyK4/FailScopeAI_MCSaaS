@@ -30,6 +30,10 @@ export async function submitContact(form: {
 
 export type TeamSize = '1-5' | '6-20' | '21-50' | '50+';
 
+export async function submitHelpFeedback(slug: string, helpful: boolean): Promise<void> {
+  await api.post('/api/public/help-feedback', { slug, helpful });
+}
+
 export async function submitDemoRequest(form: {
   name: string;
   email: string;
