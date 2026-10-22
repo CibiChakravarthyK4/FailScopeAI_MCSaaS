@@ -26,6 +26,7 @@ import { SecurityPage } from './pages/SecurityPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsPage } from './pages/TermsPage';
 import { AcceptTermsPage } from './pages/AcceptTermsPage';
+import { DemoPage } from './pages/DemoPage';
 import { OwnerLoginPage } from './pages/owner/OwnerLoginPage';
 import { OwnerDashboardPage } from './pages/owner/OwnerDashboardPage';
 
@@ -146,6 +147,7 @@ export default function App() {
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/accept-terms" element={<AcceptTermsPage />} />
+            <Route path="/demo" element={<DemoPage />} />
           </Routes>
         </BrowserRouter>
       </OwnerAuthProvider>

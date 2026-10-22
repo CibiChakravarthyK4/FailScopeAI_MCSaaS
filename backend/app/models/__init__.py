@@ -2,6 +2,7 @@ from app.models.artifact import Artifact, ArtifactType
 from app.models.audit_log import AuditLog
 from app.models.contact_message import ContactMessage, ContactMessageStatus, ContactTopic
 from app.models.defect_export import DefectExport, ExportStatus
+from app.models.demo_request import DemoRequest, DemoRequestStatus, TeamSize
 from app.models.diagnosis import Diagnosis, DiagnosisStatus, FailureCategory
 from app.models.failure_group import FailureGroup, FailureGroupMember
 from app.models.job import Job, JobStatus, JobType
@@ -24,6 +25,8 @@ __all__ = [
     "ContactMessageStatus",
     "ContactTopic",
     "DefectExport",
+    "DemoRequest",
+    "DemoRequestStatus",
     "Diagnosis",
     "DiagnosisStatus",
     "ExportStatus",
@@ -42,6 +45,7 @@ __all__ = [
     "ReviewAction",
     "Run",
     "RunStatus",
+    "TeamSize",
     "Tenant",
     "TestCase",
     "TestCaseStatus",
