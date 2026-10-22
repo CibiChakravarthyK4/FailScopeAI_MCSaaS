@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Navbar } from '../components/layout/Navbar';
-import { PageWrapper } from '../components/layout/PageWrapper';
+import { AppLayout } from '../components/app/AppLayout';
+import { PageContainer } from '../components/app/PageContainer';
+import { PageHeader } from '../components/app/PageHeader';
+import { EmptyState } from '../components/app/EmptyState';
 import { Card } from '../components/ui/Card';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { getRun } from '../services/runService';
@@ -20,31 +22,29 @@ export function RunDetailPage() {
   }, [runId]);
 
   return (
-    <PageWrapper>
-      <Navbar />
-      <div className="mx-auto max-w-5xl px-6 py-10">
+    <AppLayout>
+      <PageContainer>
         {isLoading ? (
           <p className="text-sm text-muted">Loading...</p>
         ) : !run ? (
           <p className="text-sm text-muted">Run not found.</p>
         ) : (
           <>
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <h1 className="text-xl font-semibold text-ink">{run.external_run_id}</h1>
-                <p className="text-sm text-muted">{run.environment ?? 'unspecified env'}</p>
-              </div>
-              <StatusBadge status={run.status} />
-            </div>
+            <PageHeader
+              breadcrumbs={[{ label: 'Runs', to: '/runs' }, { label: run.external_run_id }]}
+              title={run.external_run_id}
+              description={run.environment ?? 'unspecified env'}
+              action={<StatusBadge status={run.status} />}
+            />
 
             {run.test_cases.length === 0 ? (
-              <Card>
-                <p className="text-sm text-muted">
-                  {run.status === 'processing' || run.status === 'pending'
+              <EmptyState
+                title={
+                  run.status === 'processing' || run.status === 'pending'
                     ? 'Still processing this run...'
-                    : 'No failed test cases found.'}
-                </p>
-              </Card>
+                    : 'No failed test cases found.'
+                }
+              />
             ) : (
               <Card className="divide-y divide-line p-0">
                 {run.test_cases.map((tc) => (
@@ -64,7 +64,7 @@ export function RunDetailPage() {
             )}
           </>
         )}
-      </div>
-    </PageWrapper>
+      </PageContainer>
+    </AppLayout>
   );
 }

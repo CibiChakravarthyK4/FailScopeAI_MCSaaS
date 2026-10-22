@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { Navbar } from '../components/layout/Navbar';
-import { PageWrapper } from '../components/layout/PageWrapper';
+import { AppLayout } from '../components/app/AppLayout';
+import { PageContainer } from '../components/app/PageContainer';
+import { PageHeader } from '../components/app/PageHeader';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -31,7 +32,7 @@ const CATEGORIES: FailureCategory[] = [
 
 const ACTION_LABELS: Record<string, string> = {
   run_import_queued: 'Run imported',
-  diagnosis_model_call: 'AI diagnosis run',
+  diagnosis_model_call: 'Diagnosis run',
   diagnosis_reviewed: 'Reviewer action',
 };
 
@@ -114,19 +115,23 @@ export function CaseFilePage() {
   const showRail = (tab === 'evidence' || tab === 'diagnosis') && diagnosis != null;
 
   return (
-    <PageWrapper>
-      <Navbar />
-      <div className="mx-auto max-w-6xl px-6 py-10">
+    <AppLayout>
+      <PageContainer>
         {isLoading ? (
           <LoadingIndicator />
         ) : !evidence ? (
           <p className="text-sm text-muted">Test case not found.</p>
         ) : (
           <>
-            <div className="mb-3 flex items-center justify-between">
-              <h1 className="text-xl font-semibold text-ink">{evidence.test_case.name}</h1>
-              <StatusBadge status={evidence.test_case.status} />
-            </div>
+            <PageHeader
+              breadcrumbs={[
+                { label: 'Runs', to: '/runs' },
+                { label: `Run ${runId}`, to: `/runs/${runId}` },
+                { label: evidence.test_case.name },
+              ]}
+              title={evidence.test_case.name}
+              action={<StatusBadge status={evidence.test_case.status} />}
+            />
             {diagnosis && <div className="mb-6">{<TaxonomyChip category={diagnosis.category} />}</div>}
 
             <div className="mb-6 flex gap-6 border-b border-line">
@@ -178,7 +183,7 @@ export function CaseFilePage() {
                     <Card>
                       <p className="mb-3 text-sm text-muted">No diagnosis yet for this test case.</p>
                       <Button fullWidth={false} className="px-4" onClick={handleInvestigate} isLoading={isInvestigating}>
-                        Investigate with AI
+                        Run diagnosis
                       </Button>
                       {investigateError && (
                         <div className="mt-2">
@@ -295,7 +300,7 @@ export function CaseFilePage() {
             </div>
           </>
         )}
-      </div>
-    </PageWrapper>
+      </PageContainer>
+    </AppLayout>
   );
 }
