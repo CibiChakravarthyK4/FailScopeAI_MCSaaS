@@ -56,11 +56,6 @@ export function MarketingFooter() {
                 </Link>
               </li>
               <li>
-                <Link to="/careers" className="hover:text-ink">
-                  Join our Team
-                </Link>
-              </li>
-              <li>
                 <Link to="/contact" className="hover:text-ink">
                   Contact Us
                 </Link>

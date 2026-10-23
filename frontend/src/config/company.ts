@@ -1,8 +1,8 @@
 // Single source of truth for every company fact shown in the public site:
-// legal pages, footer, contact details, careers, pricing framing. Nothing
-// outside this file may hard-code a company fact - if a page needs one,
-// it imports it from here. Replace every "[placeholder]" value before
-// launch; nothing here is a real claim yet.
+// legal pages, footer, contact details, pricing framing. Nothing outside
+// this file may hard-code a company fact - if a page needs one, it imports
+// it from here. Replace every "[placeholder]" value before launch; nothing
+// here is a real claim yet.
 export const company = {
   productName: 'RootTrace Ivory',
   legalName: '[Company legal name]',

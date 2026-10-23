@@ -1,7 +1,0 @@
-%PDF-1.4
-% This is a minimal fixture file, not a real rendered PDF - the backend only
-% validates the extension and these magic bytes (app/services/careers_service.py),
-% so it's enough to exercise the real upload path end to end.
-1 0 obj << /Type /Catalog >> endobj
-trailer << /Root 1 0 R >>
-%%EOF

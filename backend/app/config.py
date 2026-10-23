@@ -41,12 +41,9 @@ class Settings(BaseSettings):
     # submissions are configured here instead.
     SUPPORT_EMAIL: str = ""
     SALES_EMAIL: str = ""
-    HIRING_EMAIL: str = ""
     MAIL_BACKEND: Literal["console", "file"] = "console"
     MAIL_FILE_DIR: str = "./storage/dev-mail"
     CAPTCHA_ENABLED: bool = False
-    PUBLIC_UPLOAD_ROOT: str = "./storage/public"
-    MAX_RESUME_SIZE_MB: int = 5
 
     # Legal document versioning (C05): the backend is the single source of
     # truth for "which version is current" - frontend/src/config/company.ts

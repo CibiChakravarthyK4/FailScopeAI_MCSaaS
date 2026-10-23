@@ -2,8 +2,6 @@ from datetime import date, datetime
 
 from pydantic import BaseModel
 
-from app.models.career_application import CareerApplicationStatus
-
 
 class OwnerLoginRequest(BaseModel):
     email: str
@@ -66,26 +64,3 @@ class BillingReportResponse(BaseModel):
     renewals_due_count: int
     expired_count: int
     rows: list[BillingReportRow]
-
-
-class CareerApplicationSummary(BaseModel):
-    id: int
-    role: str
-    name: str
-    email: str
-    status: CareerApplicationStatus
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
-
-
-class CareerApplicationDetail(CareerApplicationSummary):
-    phone: str | None
-    links: str | None
-    note: str | None
-    resume_original_filename: str
-
-
-class CareerApplicationStatusUpdate(BaseModel):
-    status: CareerApplicationStatus

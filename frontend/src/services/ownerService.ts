@@ -76,54 +76,6 @@ export async function getBillingReport(): Promise<BillingReport> {
   return data;
 }
 
-export type CareerApplicationStatus = 'new' | 'reviewed';
-
-export interface CareerApplicationSummary {
-  id: number;
-  role: string;
-  name: string;
-  email: string;
-  status: CareerApplicationStatus;
-  created_at: string;
-}
-
-export interface CareerApplicationDetail extends CareerApplicationSummary {
-  phone: string | null;
-  links: string | null;
-  note: string | null;
-  resume_original_filename: string;
-}
-
-export async function listCareerApplications(): Promise<CareerApplicationSummary[]> {
-  const { data } = await ownerApi.get<CareerApplicationSummary[]>('/api/owner/careers/applications');
-  return data;
-}
-
-export async function getCareerApplication(id: number): Promise<CareerApplicationDetail> {
-  const { data } = await ownerApi.get<CareerApplicationDetail>(`/api/owner/careers/applications/${id}`);
-  return data;
-}
-
-export async function updateCareerApplicationStatus(
-  id: number,
-  status: CareerApplicationStatus
-): Promise<CareerApplicationDetail> {
-  const { data } = await ownerApi.patch<CareerApplicationDetail>(`/api/owner/careers/applications/${id}/status`, {
-    status,
-  });
-  return data;
-}
-
-export async function downloadCareerApplicationResume(id: number, filename: string): Promise<void> {
-  const { data } = await ownerApi.get(`/api/owner/careers/applications/${id}/resume`, { responseType: 'blob' });
-  const url = URL.createObjectURL(new Blob([data]));
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
 export async function downloadBillingReportCsv(): Promise<void> {
   // A plain <a href> download wouldn't carry the owner's bearer token (the API
   // has no cookie-based session), so the CSV is fetched with auth attached and

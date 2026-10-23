@@ -1,6 +1,4 @@
-import path from 'path';
 import { test, expect } from '@playwright/test';
-import { API_URL, FIXTURES_DIR, loadState, ownerApiLogin } from './helpers';
 
 // Every public route added in the Phase 1 build-out. Visiting each one and
 // asserting it rendered its own <h1> (not a 404/blank page) is the cheapest
@@ -16,7 +14,6 @@ const PUBLIC_PAGES: { path: string; heading: RegExp }[] = [
   { path: '/terms', heading: /Clear terms, confident choices/ },
   { path: '/demo', heading: /See RootTrace Ivory with your own failures/ },
   { path: '/help', heading: /Find your way around/ },
-  { path: '/careers', heading: /Help us build a product/ },
   { path: '/faq', heading: /Questions, answered plainly/ },
   { path: '/integrations', heading: /Connect RootTrace Ivory/ },
   { path: '/tour', heading: /From a failed test to a confirmed defect/ },
@@ -72,42 +69,6 @@ test.describe('Public site pages', () => {
     await page.getByLabel(/I agree to the/).check();
     await page.getByRole('button', { name: 'Request a demo' }).click();
     await expect(page.getByText(/received your request/i)).toBeVisible();
-  });
-
-  test('submits a careers application with a PDF resume, and the owner can see it while other roles get 403', async ({
-    page,
-    request,
-  }) => {
-    const applicantEmail = `e2e-careers-${Date.now()}@example.com`;
-
-    await page.goto('/careers');
-    await page.getByLabel('Full name').fill('E2E Careers Tester');
-    await page.getByLabel('Email').fill(applicantEmail);
-    await page.setInputFiles('input[type="file"]', path.join(FIXTURES_DIR, 'sample-resume.pdf'));
-    await page.getByLabel(/I agree to the/).check();
-    await page.getByRole('button', { name: 'Submit application' }).click();
-    await expect(page.getByText(/received your application/i)).toBeVisible();
-
-    const { tenantA, owner } = loadState();
-
-    // A regular tenant token must not be able to see applications at all.
-    const tenantToken = await request
-      .post(`${API_URL}/auth/login`, { data: { email: tenantA.email, password: tenantA.password } })
-      .then((r) => r.json())
-      .then((b) => b.access_token);
-    const deniedResp = await request.get(`${API_URL}/api/owner/careers/applications`, {
-      headers: { Authorization: `Bearer ${tenantToken}` },
-    });
-    expect([401, 403]).toContain(deniedResp.status());
-
-    // The Platform Owner can see the application that was just submitted.
-    const ownerToken = await ownerApiLogin(request, owner.email, owner.password, owner.totpSecret);
-    const listResp = await request.get(`${API_URL}/api/owner/careers/applications`, {
-      headers: { Authorization: `Bearer ${ownerToken}` },
-    });
-    expect(listResp.ok()).toBeTruthy();
-    const applications = await listResp.json();
-    expect(applications.some((a: { email: string }) => a.email === applicantEmail)).toBe(true);
   });
 
   test('FAQ accordion opens and closes with a click and the keyboard', async ({ page }) => {

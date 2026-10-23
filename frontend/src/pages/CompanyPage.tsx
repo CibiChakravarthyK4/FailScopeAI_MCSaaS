@@ -160,9 +160,9 @@ export function CompanyPage() {
 
         <DoubleCtaBand
           title="Want to know more?"
-          subtitle="Talk to us about how RootTrace Ivory could fit your team, or see our open roles."
+          subtitle="Talk to us about how RootTrace Ivory could fit your team."
           primary={{ label: 'Talk to us', to: '/contact' }}
-          secondary={{ label: 'Join our Team', to: '/careers' }}
+          secondary={{ label: 'Request a demo', to: '/demo' }}
         />
       </main>
       <MarketingFooter />

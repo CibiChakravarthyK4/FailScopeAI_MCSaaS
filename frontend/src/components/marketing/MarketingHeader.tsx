@@ -19,7 +19,6 @@ const RESOURCES_ITEMS = [
 ];
 const COMPANY_ITEMS = [
   { label: 'Company Overview', href: '/company' },
-  { label: 'Join our Team', href: '/careers' },
   { label: 'Contact Us', href: '/contact' },
 ];
 
@@ -118,9 +117,6 @@ export function MarketingHeader() {
             </Link>
             <Link to="/company" className="rounded-md px-2 py-2 text-sm font-medium text-ink hover:bg-brand-blue-light">
               Company Overview
-            </Link>
-            <Link to="/careers" className="rounded-md px-2 py-2 text-sm font-medium text-ink hover:bg-brand-blue-light">
-              Join our Team
             </Link>
             <Link to="/contact" className="rounded-md px-2 py-2 text-sm font-medium text-ink hover:bg-brand-blue-light">
               Contact Us
