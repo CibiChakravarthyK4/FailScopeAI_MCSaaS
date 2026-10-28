@@ -12,7 +12,11 @@ RootTrace Ivory (Test Failure Investigator) is a multi-tenant SaaS application t
 
 **Stack**: FastAPI (Python 3.11+) + SQLAlchemy + Alembic + Pydantic v2 backend; React + TypeScript + Vite + Tailwind CSS + Framer Motion frontend; PostgreSQL 15+; JWT + Google OAuth (MFA required for Platform Owner); OpenAI behind an adapter; Docker Compose + GitHub Actions.
 
-## 2. Local development
+## 2. Working Process
+
+Work is driven by numbered prompts (Prompt 1, Prompt 2, ...) from the user - one at a time, never starting the next until told to. Every feature or fix includes tests written/updated by Claude (positive, negative, boundary, failure), then lint, typecheck, `pytest` and `vitest` actually run; UI changes also get a screenshot check at 1440/1024/390px confirming no horizontal overflow. Real results are shown, never just "tests pass." Nothing is marked finished unless its tests actually ran and passed - a skipped or failing check is stated plainly, not glossed over. Every response ends with a task update in the FINISHED / PENDING / BLOCKED-NEEDS-A-HUMAN format. Full detail and the exact template: `docs/working-process.md`.
+
+## 3. Local development
 
 Ports are shifted off the usual defaults (another project on this machine holds 5432/8000/5173). Compose project name: `failscope-ai` (legacy name, kept - see "Never do" below).
 
@@ -52,7 +56,7 @@ npm test -- --run
 npx playwright test
 ```
 
-## 3. Never do
+## 4. Never do
 
 - No red, no green, no gradients anywhere in the UI (see `docs/design-system.md` for the full two-colour rule).
 - No invented facts, statistics, customers, awards, certifications or testimonials - anywhere, ever.
@@ -62,11 +66,11 @@ npx playwright test
 - Never skip server-side RBAC/tenant checks because the UI already hides something (C02).
 - Never commit secrets, real `.env` files, or `.env` values other than placeholders.
 
-## 4. Design system
+## 5. Design system
 
 Two colours only: **Blue** (`--iv-blue` family) as the sole accent, **White**/neutral greys for everything else. No red, no green, no gradients - ever (see "Never do"). Full token table, component patterns, app-shell rules, and landing-page visual rules (one nav border, one link colour token, >=14px body text at WCAG AA, one spacing scale, one container width) are in `docs/design-system.md`.
 
-## 5. Core SaaS & Compliance Controls (C01-C08)
+## 6. Core SaaS & Compliance Controls (C01-C08)
 
 Every feature must independently enforce these, server-side:
 
@@ -79,7 +83,7 @@ Every feature must independently enforce these, server-side:
 - **C07 — Operational Readiness**: health checks, error logging/alerts, cost ceilings, tested backup/restore (`docs/environments.md`).
 - **C08 — Model Transparency**: store provider/model/prompt version with every call; display confidence + supporting/conflicting evidence.
 
-## 6. Marketing-claim rule
+## 7. Marketing-claim rule
 
 Every claim made on the public site must map to a control that is actually enforced in code and covered by a passing test - never aspirational copy. Examples:
 
@@ -91,27 +95,27 @@ Every claim made on the public site must map to a control that is actually enfor
 
 If a new marketing sentence can't be mapped to an existing or new control + test, don't ship the sentence.
 
-## 7. Project layout
+## 8. Project layout
 
 ```text
 backend/app/{routers,models,schemas,services,storage,utils,workers}/
 frontend/src/{components,pages,services,theme,config,content}/
-docs/{design-system,testing,platform-owner,billing,public-legal-pages,environments}.md
+docs/{design-system,testing,platform-owner,billing,public-legal-pages,environments,working-process}.md
 docs/ui/        # reference screenshots
 PRPs/, agents/, skills/, scripts/
 ```
 
-## 8. Current status (as of 2026-10-28)
+## 9. Current status (as of 2026-10-28)
 
-**Done**: all 5 MVP modules (auth/tenancy, run import/evidence, AI diagnosis/grouping, reviewer workflow/export, dashboard/usage) built and passing - 128/128 backend tests, 30/30 Playwright E2E tests. Full public marketing site (landing, company, contact, pricing, security, demo, help center, FAQ, integrations, tour, legal pages, 404) and Platform Owner dashboard built. Google OAuth, JWT auth, redaction, grouping, idempotent export all working end-to-end against the local Docker stack.
+**Done**: all 5 MVP modules (auth/tenancy, run import/evidence, AI diagnosis/grouping, reviewer workflow/export, dashboard/usage) built and passing - 128/128 backend tests, 30/30 Playwright E2E tests. Full public marketing site (landing, company, contact, pricing, security, demo, help center, FAQ, integrations, tour, legal pages, 404) and Platform Owner dashboard built. Google OAuth, JWT auth, redaction, grouping, idempotent export all working end-to-end against the local Docker stack. Landing-page visual fixes applied (confidence meter rounding, connector overhang, badge shapes, stats strip hierarchy).
 
-**In progress**: public-site visual polish (landing page); CLAUDE.md restructure (this file).
+**In progress**: two unresolved landing-page visual reports (a colour strip above the nav, a doubled border under it) pending a screenshot from the user - not reproducible from source alone.
 
 **Blocked on human decisions**: every `[placeholder]` in `frontend/src/config/company.ts` (legal name, address, phone, grievance officer, legal doc effective dates) and `frontend/src/config/pricing.ts` ("Contact us for pricing" by design) - see `docs/public-legal-pages.md`. Payment provider integration deferred to post-pilot (`docs/billing.md`). Brand/domain name clearance not yet done.
 
 **Explicitly out of MVP** (not started): flaky-vs-regression detection (F06), external CI/log connectors (F07), AI fix-proposal + rerun verification (F09).
 
-## 9. Further detail
+## 10. Further detail
 
 @docs/design-system.md
 @docs/testing.md
@@ -119,3 +123,4 @@ PRPs/, agents/, skills/, scripts/
 @docs/billing.md
 @docs/public-legal-pages.md
 @docs/environments.md
+@docs/working-process.md
