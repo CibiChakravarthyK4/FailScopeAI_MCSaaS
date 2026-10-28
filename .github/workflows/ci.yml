@@ -5,14 +5,22 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment for this run - set to production to run the launch-blocker check below"
+        required: true
+        default: development
+        type: choice
+        options: [development, production]
 
 jobs:
   backend-test:
     runs-on: ubuntu-latest
     services:
       # Ports (5433/6380) and the "failscope" maintenance db name match local dev
-      # (see CLAUDE.md Section 7) on purpose: tests/conftest.py hardcodes these
-      # same values, so CI runs the exact same test suite with no special-casing.
+      # (see CLAUDE.md "Local development") on purpose: tests/conftest.py hardcodes
+      # these same values, so CI runs the exact same test suite with no special-casing.
       postgres:
         image: postgres:15-alpine
         env:
@@ -84,18 +92,66 @@ jobs:
         run: |
           cd frontend
           npm audit --audit-level=high
-      - name: UI design compliance (CLAUDE.md Section 4 and 10.5)
+      - name: UI design compliance (docs/design-system.md, docs/testing.md)
         run: |
           cd frontend/src
           ! grep -rE "(linear|radial|conic)-gradient" . --include="*.tsx" --include="*.ts" --include="*.css"
           ! grep -rEn '\b(red|green|amber|yellow|orange|purple)-[0-9]+\b' . --include="*.tsx" --include="*.ts"
-      - name: Branding check - no old product name (CLAUDE.md Section 10.5)
+      - name: Branding check - no old product name (docs/testing.md)
         run: |
           cd frontend/src
           # theme/tokens.css is the one allowed exception: a comment explaining
           # why the token prefix changed, not user-facing text.
           ! grep -rn "FailScope\|ScopeRing\|Scope Ring" . --include="*.tsx" --include="*.ts" | grep -v "theme/tokens.css"
           ! grep -rn --include="*.tsx" --include="*.ts" --include="*.css" -- "--fs-" . | grep -v "theme/tokens.css"
+
+  launch-blocker-check:
+    # Only runs when someone deliberately triggers this workflow with
+    # environment=production (Actions tab -> "Run workflow") - never on an
+    # ordinary push/PR, since frontend/src/config/company.ts's placeholders
+    # are expected to still be unfilled during normal development and would
+    # otherwise fail every single CI run until launch.
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+      - name: Build for production
+        env:
+          APP_ENV: production
+        run: |
+          cd frontend
+          npm run build
+      - name: Launch blocker - no unfilled company.ts placeholder may reach a production build
+        run: |
+          cd frontend
+          # Exact known placeholder strings from src/config/company.ts, not a
+          # generic [bracket] pattern - a generic pattern false-positives on
+          # minified regex character classes, [object Object]/[object
+          # FormData], and markdown link text like "[Security and Trust]"
+          # from Help Center articles, which would never clear even once
+          # every real placeholder is filled in.
+          ! grep -rF \
+            -e '[Company legal name]' \
+            -e '[support email]' \
+            -e '[sales email]' \
+            -e '[hiring email]' \
+            -e '[security email]' \
+            -e '[phone number]' \
+            -e '[registered address]' \
+            -e '[working hours]' \
+            -e '[Grievance Officer name]' \
+            -e '[grievance officer email]' \
+            -e '[grievance officer address]' \
+            -e '[city]' \
+            -e '[effective date]' \
+            dist/
 
   secret-scan:
     runs-on: ubuntu-latest
