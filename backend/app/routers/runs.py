@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.dependencies import get_current_user, require_role
 from app.exceptions import AppException
-from app.models.audit_log import AuditLog
 from app.models.artifact import Artifact
+from app.models.audit_log import AuditLog
 from app.models.diagnosis import Diagnosis
 from app.models.run import Run
 from app.models.test_case import TestCase

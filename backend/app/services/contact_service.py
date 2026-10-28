@@ -27,5 +27,10 @@ def submit_contact(db: Session, req: ContactRequest, ip: str | None, user_agent:
     mail_service.send_notification(
         to=settings.SUPPORT_EMAIL,
         subject=f"New contact message: {req.topic.value}",
-        body=f"From: {req.name} <{req.email}>\nCompany: {req.company or '-'}\nTopic: {req.topic.value}\n\n{req.message}",
+        body=(
+            f"From: {req.name} <{req.email}>\n"
+            f"Company: {req.company or '-'}\n"
+            f"Topic: {req.topic.value}\n\n"
+            f"{req.message}"
+        ),
     )
