@@ -67,8 +67,11 @@ export function StatusBadge({ status }: { status: string }) {
   const style = STYLES[status] ?? { icon: DashIcon, className: 'border border-iv-border bg-white text-iv-text-2' };
   const Icon = style.icon;
   return (
+    // Pill shape (rounded-full) matches TaxonomyChip exactly, so a status
+    // badge and a taxonomy chip shown side by side (e.g. ProductPreviewCard)
+    // read as one badge family, told apart only by icon + label, never shape.
     <span
-      className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium capitalize ${style.className}`}
+      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${style.className}`}
     >
       <Icon />
       {status}

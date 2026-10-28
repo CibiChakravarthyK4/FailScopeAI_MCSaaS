@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '../ui/Button';
+import { TraceRing } from '../ui/TraceRing';
 import { Container } from './Container';
 import { ProductPreviewCard } from './ProductPreviewCard';
 
@@ -9,10 +10,11 @@ export function Hero() {
       <Container>
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           <div>
-            <span className="mb-5 inline-block rounded-full border border-line bg-brand-blue-light px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-blue">
+            <span className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-line bg-brand-blue-light px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-blue">
+              <TraceRing size={14} />
               Test Failure Investigator
             </span>
-            <h1 className="text-4xl font-bold leading-tight text-ink sm:text-5xl lg:text-[56px] lg:leading-[1.14]">
+            <h1 className="text-balance text-4xl font-bold leading-tight text-ink sm:text-5xl lg:text-[56px] lg:leading-[1.14]">
               Find the root cause of every failed test, backed by evidence.
             </h1>
             <p className="mt-5 max-w-lg text-lg text-muted">
