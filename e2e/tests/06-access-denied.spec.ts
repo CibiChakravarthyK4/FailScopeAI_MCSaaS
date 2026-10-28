@@ -20,13 +20,15 @@ test.describe('Access denied', () => {
     await uiLogin(page, viewer.email, viewer.password);
 
     await page.goto('/runs/new');
-    await page.getByLabel('Run ID').fill(`e2e-denied-${Date.now()}`);
-    await page.setInputFiles('input[type="file"]', {
+    await page.locator('input[type="file"]').first().setInputFiles({
       name: 'sample-run.xml',
       mimeType: 'application/xml',
       buffer: Buffer.from('<testsuite><testcase name="t"><failure>x</failure></testcase></testsuite>'),
     });
-    await page.getByRole('button', { name: 'Import' }).click();
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.getByLabel('Run name').fill(`e2e-denied-${Date.now()}`);
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.getByRole('button', { name: 'Start analysis' }).click();
 
     // Backend returns 403 (app/dependencies.py require_role); the UI shows its
     // generic import-failure copy since it doesn't special-case this status,

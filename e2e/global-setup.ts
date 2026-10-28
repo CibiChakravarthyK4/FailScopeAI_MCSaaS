@@ -51,10 +51,21 @@ export default async function globalSetup(): Promise<void> {
     const { rows } = await pg.query('SELECT id FROM tenants WHERE name = $1', [tenantA.tenantName]);
     const tenantAId = rows[0].id;
     const hashed = bcrypt.hashSync(viewer.password, 10);
-    await pg.query(
+    const { rows: userRows } = await pg.query(
       `INSERT INTO users (tenant_id, email, hashed_password, role, is_active, created_at, updated_at)
-       VALUES ($1, $2, $3, 'viewer', true, now(), now())`,
+       VALUES ($1, $2, $3, 'viewer', true, now(), now()) RETURNING id`,
       [tenantAId, viewer.email, hashed]
+    );
+    // /auth/register records legal acceptance as part of signup (CLAUDE.md
+    // 17.4) - this user is inserted directly, bypassing that, so without this
+    // they'd hit the "Updated terms" interstitial (ProtectedRoute's
+    // needs_legal_acceptance redirect) on first login instead of their
+    // intended destination.
+    const viewerId = userRows[0].id;
+    await pg.query(
+      `INSERT INTO legal_acceptances (user_id, document, version, created_at, updated_at)
+       VALUES ($1, 'privacy', '0.1-draft', now(), now()), ($1, 'terms', '0.1-draft', now(), now())`,
+      [viewerId]
     );
 
     // No HTTP endpoint creates a Platform Owner either (by design - see

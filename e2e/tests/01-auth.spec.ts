@@ -26,10 +26,13 @@ test.describe('Sign in', () => {
     await uiLogin(page, tenantA.email, tenantA.password);
 
     await expect(page.getByRole('heading', { name: /Welcome,/ })).toBeVisible();
-    // The dashboard heading also contains the email (no full_name set for
-    // this tenant), so scope to the navbar specifically to avoid an
-    // ambiguous match between the two.
-    await expect(page.locator('header').getByText(tenantA.email)).toBeVisible();
+    // The email isn't shown in the header by default - only inside the
+    // AvatarMenu dropdown (components/app/AvatarMenu.tsx), once opened.
+    // No full_name is set for this tenant, so AvatarMenu's dropdown shows the
+    // email twice (the name line falls back to it, plus the email line right
+    // below it) - .first() picks either, both being the same text.
+    await page.getByRole('button', { name: 'Account menu' }).click();
+    await expect(page.getByText(tenantA.email).first()).toBeVisible();
   });
 
   test('rejects an invalid password', async ({ page }) => {

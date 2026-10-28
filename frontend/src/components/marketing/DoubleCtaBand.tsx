@@ -9,7 +9,7 @@ interface CtaLink {
 
 // The two-button variant of FinalCta's single-button band, for pages that
 // want to offer a human conversation (Talk to us) alongside a secondary path
-// (Join our Team) rather than a single "Get started".
+// rather than a single "Get started".
 export function DoubleCtaBand({
   title,
   subtitle,

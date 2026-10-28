@@ -2,12 +2,12 @@ import { test, expect } from '@playwright/test';
 import { apiLogin, importSampleRunViaApi, loadState, uiLogin, waitForRunCompleted } from './helpers';
 
 // Journey 3: "View evidence and AI diagnosis with citations."
-// "Investigate with AI" calls the real OPENAI_API_KEY code path - this only
+// "Run diagnosis" calls the real OPENAI_API_KEY code path - this only
 // produces a real result here because docker-compose.e2e.yml points it at the
 // deterministic stub in e2e/fake-openai-server.py, not a real model. See
 // CLAUDE.md 10.3 for what a true AI-quality evaluation requires instead.
 //
-// The case-file layout (CLAUDE.md 4.3) puts "Investigate with AI" under the
+// The case-file layout (CLAUDE.md 4.3) puts "Run diagnosis" under the
 // Diagnosis tab, not the default Evidence tab - this test switches tabs
 // explicitly rather than assuming the button is visible on load.
 test('views evidence for a failed test case and runs an AI diagnosis with citations', async ({ page, request }) => {
@@ -28,7 +28,7 @@ test('views evidence for a failed test case and runs an AI diagnosis with citati
 
   // Diagnosis tab: no diagnosis yet, so only the investigate action shows.
   await page.getByRole('button', { name: 'Diagnosis' }).click();
-  await page.getByRole('button', { name: 'Investigate with AI' }).click();
+  await page.getByRole('button', { name: 'Run diagnosis' }).click();
 
   // A plain string match is case-insensitive and also matches the reviewer
   // form's lowercase "application bug" <option>; an exact-case regex (no `i`
